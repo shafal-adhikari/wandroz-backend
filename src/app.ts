@@ -8,8 +8,9 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import http from 'http';
 import { createClient } from 'redis';
+import routes from './routes';
 import { Server } from 'socket.io';
-import { config, validateConfig } from './config';
+import { cloudinaryConfig, config, validateConfig } from './config';
 import databseConnection from './setupDatabase';
 import { CustomError, IErrorResponse, NotFoundError } from './shared/globals/helpers/error-handler';
 const app = express();
@@ -43,7 +44,7 @@ app.use(
     limit: '50mb'
   })
 );
-
+routes(app);
 app.use('*', () => {
   throw new NotFoundError();
 });
@@ -55,6 +56,7 @@ app.use((error: IErrorResponse, _req: Request, res: Response, next: NextFunction
   next();
 });
 validateConfig();
+cloudinaryConfig();
 databseConnection();
 const httpServer = new http.Server(app);
 const SERVER_PORT = 5500;
