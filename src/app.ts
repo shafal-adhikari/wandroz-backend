@@ -65,7 +65,7 @@ httpServer.listen(SERVER_PORT, () => {
   console.log(`Server running on port ${SERVER_PORT}`);
 });
 
-const io: Server = new Server(httpServer, {
+const io = new Server(httpServer, {
   cors: {
     origin: config.CLIENT_URL,
     credentials: true,

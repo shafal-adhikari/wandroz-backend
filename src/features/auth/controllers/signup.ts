@@ -11,7 +11,11 @@ import HTTP_STATUS from 'http-status-codes';
 import { IUserDocument } from '@user/interfaces/user.interface';
 import { config } from '@root/config';
 import { saveUserToCache } from '@service/redis/user.cache';
-export const create = joiValidation(signupSchema)(async (req: Request, res: Response) => {
+import { omit } from 'lodash';
+import { addAuthUserJob } from '@service/queues/auth.queue';
+import { addUserJob } from '@service/queues/user.queue';
+import JWT from 'jsonwebtoken';
+export const signUp = joiValidation(signupSchema)(async (req: Request, res: Response) => {
   const { username, email, password, avatarColor, avatarImage } = req.body;
   const checkIfUserExist: IAuthDocument = await getUserByUsernameOrEmail(username, email.toLowerCase());
   if (checkIfUserExist) {
@@ -36,9 +40,29 @@ export const create = joiValidation(signupSchema)(async (req: Request, res: Resp
   const userDataToSave: IUserDocument = userData(authData, userObjectId);
   userDataToSave.profilePicture = `https://res.cloudinary.com/${config.CLOUD_NAME}/image/upload/v${result.version}/${userObjectId}`;
   await saveUserToCache(`${userObjectId}`, uId, userDataToSave);
-  res.status(HTTP_STATUS.CREATED).json({ message: 'User Created Successfully', authData });
+  omit(userDataToSave, ['uId', 'username', 'email', 'password', 'avatarColor']);
+  addAuthUserJob('addAuthUserToDB', { value: authData });
+  addUserJob('addAuthUserToDB', { value: userDataToSave });
+  const jwtToken = generateSignUpToken(authData, userObjectId);
+  req.session = { jwt: jwtToken };
+  res.status(HTTP_STATUS.CREATED).json({ message: 'User Created Successfully', user: userDataToSave, token: jwtToken });
 });
 
+const generateSignUpToken = (data: IAuthDocument, userObjectId: ObjectId): string => {
+  return JWT.sign(
+    {
+      userId: userObjectId,
+      uId: data.uId,
+      email: data.email,
+      username: data.username,
+      avatarColor: data.avatarColor
+    },
+    config.JWT_TOKEN,
+    {
+      expiresIn: 24 * 3600000
+    }
+  );
+};
 const signUpData = (data: ISignUpData): IAuthDocument => {
   const { _id, username, email, uId, password, avatarColor } = data;
   return {
@@ -55,8 +79,8 @@ const signUpData = (data: ISignUpData): IAuthDocument => {
 const userData = (data: IAuthDocument, userObjectId: ObjectId): IUserDocument => {
   const { _id, username, password, email, uId, avatarColor } = data;
   return {
-    _id: userObjectId,
-    authId: _id,
+    _id: userObjectId.toString(),
+    authId: _id.toString(),
     username,
     password,
     email,
