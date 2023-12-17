@@ -12,13 +12,17 @@ export const config = {
   REDIS_HOST: process.env.REDIS_HOST || 'redis://localhost:6379',
   CLOUD_NAME: process.env.CLOUD_NAME,
   CLOUD_API_KEY: process.env.CLOUD_API_KEY,
-  CLOUD_API_SECRET: process.env.CLOUD_API_SECRET
+  CLOUD_API_SECRET: process.env.CLOUD_API_SECRET,
+  SENDER_EMAIL: process.env.SENDER_EMAIL || 'haskell.purdy89@ethereal.email',
+  SENDER_EMAIL_PASSWORDs: process.env.SENDER_EMAIL_PASSWORD || 'f8aVyed7usAAf1hgET',
+  SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
+  SENDGRID_SENDER: process.env.SENDGRID_SENDER
 };
 
 export const validateConfig = () => {
   for (const [key, value] of Object.entries(config)) {
     if (value == undefined) {
-      throw new Error(`ENV for ${key} doesn't exits`);
+      throw new Error(`ENV for ${key} doesnt exist`);
     }
   }
 };

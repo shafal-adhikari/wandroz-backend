@@ -3,7 +3,7 @@ import { joiValidation } from '@root/shared/globals/validations/joiValidations';
 import { signupSchema } from '../schemes/signup';
 import { Request, Response } from 'express';
 import { IAuthDocument, ISignUpData } from '@auth/interfaces/auth.interface';
-import { getUserByUsernameOrEmail } from '@root/shared/services/db/auth.service';
+import { getAuthUserByUsernameOrEmail } from '@root/shared/services/db/auth.service';
 import { BadRequestError } from '@root/shared/globals/helpers/error-handler';
 import { UploadApiResponse } from 'cloudinary';
 import { uploads } from '@root/shared/globals/helpers/cloudinary-upload';
@@ -15,15 +15,16 @@ import { omit } from 'lodash';
 import { addAuthUserJob } from '@service/queues/auth.queue';
 import { addUserJob } from '@service/queues/user.queue';
 import JWT from 'jsonwebtoken';
+import { v4 as uuid } from 'uuid';
 export const signUp = joiValidation(signupSchema)(async (req: Request, res: Response) => {
   const { username, email, password, avatarColor, avatarImage } = req.body;
-  const checkIfUserExist: IAuthDocument = await getUserByUsernameOrEmail(username, email.toLowerCase());
+  const checkIfUserExist: IAuthDocument = await getAuthUserByUsernameOrEmail(username, email.toLowerCase());
   if (checkIfUserExist) {
     throw new BadRequestError('User already exists');
   }
   const authObjectId: ObjectId = new ObjectId();
   const userObjectId: ObjectId = new ObjectId();
-  const uId = authObjectId.toString();
+  const uId = uuid();
   const authData: IAuthDocument = signUpData({
     _id: authObjectId,
     uId,
