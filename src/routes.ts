@@ -9,4 +9,5 @@ export default (app: Application) => {
   app.use('/queues', serverAdapter.getRouter());
   app.use(BASE_PATH, authRouter);
   app.use(BASE_PATH, verifyUser, currentUserRouter);
+  app.use(BASE_PATH, verifyUser, userRouter);
 };

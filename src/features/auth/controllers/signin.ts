@@ -8,7 +8,6 @@ import { Request, Response } from 'express';
 import JWT from 'jsonwebtoken';
 import { getUserByAuthId } from '@service/db/user.service';
 import { IUserDocument } from '@user/interfaces/user.interface';
-import { sendEmail } from '@service/emails/mail-transport';
 
 export const signIn = joiValidation(loginSchema)(async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -40,7 +39,6 @@ export const signIn = joiValidation(loginSchema)(async (req: Request, res: Respo
     uId: existingUser.uId,
     createdAt: existingUser.createdAt
   } as IUserDocument;
-  await sendEmail('haskell.purdy89@ethereal.email', 'Testing Email', 'This is a  test email for dev server');
   req.session = { jwt: jwtToken };
   res.status(HTTP_STATUS.OK).json({ message: 'User login successfully', user: userDocument, token: jwtToken });
 });

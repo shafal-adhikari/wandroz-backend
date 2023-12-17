@@ -1,7 +1,7 @@
 import { IAuthDocument } from '@auth/interfaces/auth.interface';
 import { AuthModel } from '@auth/models/auth.schema';
 
-export const getUserByUsernameOrEmail = async (username: string, email: string): Promise<IAuthDocument> => {
+export const getAuthUserByUsernameOrEmail = async (username: string, email: string): Promise<IAuthDocument> => {
   const query = {
     $or: [{ username: username }, { email: email }]
   };
@@ -15,5 +15,23 @@ export const createAuthUser = async (data: IAuthDocument): Promise<void> => {
 
 export const getAuthUserByUsername = async (username: string): Promise<IAuthDocument> => {
   const user = (await AuthModel.findOne({ $or: [{ username: username }, { email: username }] }).exec()) as IAuthDocument;
+  return user;
+};
+
+export const updatePasswordToken = async (authId: string, token: string, tokenExpiration: number) => {
+  await AuthModel.updateOne(
+    { _id: authId },
+    {
+      passwordResetToken: token,
+      passwordResetExpires: tokenExpiration
+    }
+  );
+};
+
+export const getAuthUserByPasswordToken = async (token: string) => {
+  const user = (await AuthModel.findOne({
+    passwordResetToken: token,
+    passwordResetExpires: { $gt: Date.now() }
+  }).exec()) as IAuthDocument;
   return user;
 };
