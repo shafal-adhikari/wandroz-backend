@@ -1,7 +1,9 @@
 import { ServerError } from '@global/helpers/error-handler';
-import { IUserDocument } from '@user/interfaces/user.interface';
+import { INotificationSettings, ISocialLinks, IUserDocument } from '@user/interfaces/user.interface';
 import { redisClient } from './redisClient';
 import { parseJson } from '@global/helpers/helpers';
+
+type UserItem = string | ISocialLinks | INotificationSettings;
 
 export const saveUserToCache = async (key: string, userId: string, createdUser: IUserDocument): Promise<void> => {
   const createdAt = new Date();
@@ -41,6 +43,26 @@ export const getUserFromCache = async (userId: string): Promise<IUserDocument | 
     response.followingCount = parseJson(`${response.followingCount}`);
     response.postsCount = parseJson(`${response.postsCount}`);
     return response;
+  } catch (error) {
+    throw new ServerError();
+  }
+};
+
+export const updateSingleUserItemInCache = async (userId: string, prop: string, value: UserItem): Promise<IUserDocument | null> => {
+  try {
+    const dataToSave: string[] = [`${prop}`, JSON.stringify(value)];
+    await redisClient.HSET(`users:${userId}`, dataToSave);
+    const response: IUserDocument = (await getUserFromCache(userId)) as IUserDocument;
+    return response;
+  } catch (error) {
+    throw new ServerError();
+  }
+};
+
+export const getTotalUsersInCache = async (): Promise<number> => {
+  try {
+    const count: number = await redisClient.ZCARD('user');
+    return count;
   } catch (error) {
     throw new ServerError();
   }

@@ -3,10 +3,10 @@ import { createBullBoard } from '@bull-board/api';
 import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { IAuthJob } from '@auth/interfaces/auth.interface';
-import { IEmailJob } from '@user/interfaces/user.interface';
+import { IEmailJob, IUserJob } from '@user/interfaces/user.interface';
 
 let bullAdapters: BullMQAdapter[] = [];
-type IBaseJobData = IAuthJob | IEmailJob;
+type IBaseJobData = IAuthJob | IUserJob | IEmailJob;
 export let serverAdapter: ExpressAdapter;
 export const createQueue = (queueName: string) => {
   const queue = new Queue(queueName, {
