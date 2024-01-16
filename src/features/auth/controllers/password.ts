@@ -13,6 +13,7 @@ import publicIp from 'ip';
 import moment from 'moment';
 import crypto from 'crypto';
 import { passwordResetConfirmationTemplate } from '@service/emails/templates/reset-password/reset-password-template';
+
 export const createResetPasswordToken = joiValidation(emailSchema)(async (req: Request, res: Response) => {
   const { email } = req.body;
   const existingUser = await getAuthUserByUsernameOrEmail(email, email);

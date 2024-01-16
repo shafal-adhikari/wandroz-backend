@@ -1,49 +1,106 @@
-import { IUserDocument } from '@user/interfaces/user.interface';
+import { IBasicInfo, ISearchUser, IUserDocument, ISocialLinks, INotificationSettings } from '@user/interfaces/user.interface';
 import { UserModel } from '@user/models/user.schema';
 import mongoose from 'mongoose';
+import { AuthModel } from '@auth/models/auth.schema';
 
-export const addUserData = async (data: IUserDocument) => {
+export async function addUserData(data: IUserDocument): Promise<void> {
   await UserModel.create(data);
-};
+}
 
-export const getUserByAuthId = async (authId: string) => {
+export async function updatePassword(username: string, hashedPassword: string): Promise<void> {
+  await AuthModel.updateOne({ username }, { $set: { password: hashedPassword } }).exec();
+}
+
+export async function updateUserInfo(userId: string, info: IBasicInfo): Promise<void> {
+  await UserModel.updateOne(
+    { _id: userId },
+    {
+      $set: {
+        work: info['work'],
+        school: info['school'],
+        quote: info['quote'],
+        location: info['location']
+      }
+    }
+  ).exec();
+}
+
+export async function updateSocialLinks(userId: string, links: ISocialLinks): Promise<void> {
+  await UserModel.updateOne({ _id: userId }, { $set: { social: links } }).exec();
+}
+
+export async function updateNotificationSettings(userId: string, settings: INotificationSettings): Promise<void> {
+  await UserModel.updateOne({ _id: userId }, { $set: { notifications: settings } }).exec();
+}
+
+export async function getUserById(userId: string): Promise<IUserDocument> {
   const users: IUserDocument[] = await UserModel.aggregate([
-    {
-      $match: { authId: new mongoose.Types.ObjectId(authId) }
-    },
-    {
-      $lookup: { from: 'Auth', localField: 'authId', foreignField: '_id', as: 'authId' }
-    },
+    { $match: { _id: new mongoose.Types.ObjectId(userId) } },
+    { $lookup: { from: 'Auth', localField: 'authId', foreignField: '_id', as: 'authId' } },
     { $unwind: '$authId' },
     { $project: aggregateProject() }
   ]);
   return users[0];
-};
+}
 
-export const getUserById = async (userId: string) => {
+export async function getUserByAuthId(authId: string): Promise<IUserDocument> {
   const users: IUserDocument[] = await UserModel.aggregate([
-    {
-      $match: { _id: new mongoose.Types.ObjectId(userId) }
-    },
-    {
-      $lookup: { from: 'Auth', localField: 'authId', foreignField: '_id', as: 'authId' }
-    },
+    { $match: { authId: new mongoose.Types.ObjectId(authId) } },
+    { $lookup: { from: 'Auth', localField: 'authId', foreignField: '_id', as: 'authId' } },
     { $unwind: '$authId' },
     { $project: aggregateProject() }
   ]);
   return users[0];
-};
+}
 
-const aggregateProject = () => {
+export async function getAllUsers(userId: string, skip: number, limit: number): Promise<IUserDocument[]> {
+  const users: IUserDocument[] = await UserModel.aggregate([
+    { $match: { _id: { $ne: new mongoose.Types.ObjectId(userId) } } },
+    { $skip: skip },
+    { $limit: limit },
+    { $sort: { createdAt: -1 } },
+    { $lookup: { from: 'Auth', localField: 'authId', foreignField: '_id', as: 'authId' } },
+    { $unwind: '$authId' },
+    { $project: aggregateProject() }
+  ]);
+  return users;
+}
+
+export async function getTotalUsersInDB(): Promise<number> {
+  const totalCount: number = await UserModel.find({}).countDocuments();
+  return totalCount;
+}
+
+export async function searchUsers(regex: RegExp): Promise<ISearchUser[]> {
+  const users = await AuthModel.aggregate([
+    { $match: { username: regex } },
+    { $lookup: { from: 'User', localField: '_id', foreignField: 'authId', as: 'user' } },
+    { $unwind: '$user' },
+    {
+      $project: {
+        _id: '$user._id',
+        username: 1,
+        email: 1,
+        avatarColor: 1,
+        profilePicture: 1
+      }
+    }
+  ]);
+  return users;
+}
+
+function aggregateProject() {
   return {
     _id: 1,
     username: '$authId.username',
-    email: '$authId.email',
     uId: '$authId.uId',
+    email: '$authId.email',
     avatarColor: '$authId.avatarColor',
     createdAt: '$authId.createdAt',
-    quote: 1,
     postsCount: 1,
+    work: 1,
+    school: 1,
+    quote: 1,
     location: 1,
     blocked: 1,
     blockedBy: 1,
@@ -55,4 +112,4 @@ const aggregateProject = () => {
     bgImageId: 1,
     profilePicture: 1
   };
-};
+}
