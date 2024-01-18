@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import HTTP_STATUS from 'http-status-codes';
 import { updateSingleUserItemInCache } from '@service/redis/user.cache';
 import { addUserJob } from '@service/queues/user.queue';
-import { basicInfoSchema, socialLinksSchema } from '@user/schemas/info';
+import { basicInfoSchema, socialLinksSchema } from '@user/schemes/info';
 import { joiValidation } from '@global/validations/joiValidations';
 
 export const updateBasicInfo: (req: Request, res: Response) => Promise<void> = joiValidation(basicInfoSchema)(async (

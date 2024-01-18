@@ -1,0 +1,83 @@
+@baseUrl = http://localhost:5500
+@urlPath = api/v1
+
+###
+GET {{baseUrl}}/{{urlPath}}/user/profile
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+GET {{baseUrl}}/{{urlPath}}/user/profile/<userId>
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+GET {{baseUrl}}/{{urlPath}}/user/profile/posts/<username>/<userId>/<uId>
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+GET {{baseUrl}}/{{urlPath}}/user/profile/user/suggestions
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+GET {{baseUrl}}/{{urlPath}}/user/profile/search/sadfafas
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+PUT {{baseUrl}}/{{urlPath}}/user/profile/change-password
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+{
+  "currentPassword": "jenny",
+  "newPassword": "jenny123",
+  "confirmPassword": "jenny123"
+}
+
+###
+PUT {{baseUrl}}/{{urlPath}}/user/profile/basic-info
+content-type: application/json
+Accept: 'application/json'
+withCredentials: true
+
+{
+  "quote": "Hello World",
+  "work": "Octagon Infotech",
+  "school": "Coventry",
+  "location": "Al Ain, Abu Dhabi"
+}
+
+###
+PUT {{baseUrl}}/{{urlPath}}/user/profile/social-links
+content-type: application/json
+Accept: 'application/json'
+withCredentials: true
+
+{
+  "instagram": "https://www.instagram.com/safaladhikary",
+  "twitter": "",
+  "facebook": "",
+  "youtube": ""
+}
+
+###
+PUT {{baseUrl}}/{{urlPath}}/user/profile/settings
+content-type: application/json
+Accept: 'application/json'
+withCredentials: true
+
+{
+  "messages": true,
+  "reactions": true,
+  "comments": false,
+  "follows": true
+}

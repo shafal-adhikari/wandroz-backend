@@ -17,7 +17,7 @@ import { addUserJob } from '@service/queues/user.queue';
 import JWT from 'jsonwebtoken';
 import { v4 as uuid } from 'uuid';
 export const signUp = joiValidation(signupSchema)(async (req: Request, res: Response) => {
-  const { username, email, password, avatarColor, avatarImage } = req.body;
+  const { username, email, password, avatarImage } = req.body;
   const checkIfUserExist: IAuthDocument = await getAuthUserByUsernameOrEmail(username, email.toLowerCase());
   if (checkIfUserExist) {
     throw new BadRequestError('User already exists');
@@ -30,16 +30,18 @@ export const signUp = joiValidation(signupSchema)(async (req: Request, res: Resp
     uId,
     username,
     email,
-    password,
-    avatarColor
+    password
   });
-
-  const result = (await uploads(avatarImage, userObjectId.toString(), true, true)) as UploadApiResponse;
-  if (!result.public_id) {
-    throw new BadRequestError('Error uploading file. Please try again');
-  }
   const userDataToSave: IUserDocument = userData(authData, userObjectId);
-  userDataToSave.profilePicture = `https://res.cloudinary.com/${config.CLOUD_NAME}/image/upload/v${result.version}/${userObjectId}`;
+
+  if (avatarImage) {
+    const result = (await uploads(avatarImage, userObjectId.toString(), true, true)) as UploadApiResponse;
+
+    if (!result.public_id) {
+      throw new BadRequestError('Error uploading file. Please try again');
+    }
+    userDataToSave.profilePicture = `https://res.cloudinary.com/${config.CLOUD_NAME}/image/upload/v${result.version}/${userObjectId}`;
+  }
   await saveUserToCache(`${userObjectId}`, uId, userDataToSave);
   omit(userDataToSave, ['uId', 'username', 'email', 'password', 'avatarColor']);
   addAuthUserJob('addAuthUserToDB', { value: authData });

@@ -34,6 +34,7 @@ export const getAllUsers: (req: Request, res: Response) => Promise<void> = async
 
 export const getUserProfile: (req: Request, res: Response) => Promise<void> = async (req, res) => {
   const existingUser: IUserDocument = await userService.getUserById(`${req.currentUser!.userId}`);
+  console.log(existingUser);
   res.status(HTTP_STATUS.OK).json({ message: 'Get user profile', user: existingUser });
 };
 

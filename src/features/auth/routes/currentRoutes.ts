@@ -6,4 +6,4 @@ const router = Router();
 
 router.get('/currentuser', checkAuthentication, currentUser);
 
-export { router as currentUserRouter };
+export const currentUserRoutes = router;

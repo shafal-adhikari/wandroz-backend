@@ -1,13 +1,27 @@
-import { addUserData } from '@service/db/user.service';
-import { IUserDocument, IUserJob } from '@user/interfaces/user.interface';
+import * as userService from '@service/db/user.service';
+import { IBasicInfo, INotificationSettings, ISocialLinks, IUserDocument } from '@user/interfaces/user.interface';
 import { Job, Worker } from 'bullmq';
 
 export const instantiatieUserWorker = (queueName: string) => {
   new Worker(
     queueName,
     async (job: Job) => {
-      const { value } = job.data as IUserJob;
-      await addUserData(value as IUserDocument);
+      const { value, key } = job.data;
+
+      switch (job.name) {
+        case 'addAuthUserToDB':
+          await userService.addUserData(value as IUserDocument);
+          break;
+        case 'updateBasicInfoInDB':
+          await userService.updateUserInfo(key!, value as IBasicInfo);
+          break;
+        case 'updateSocialLinksInDB':
+          await userService.updateSocialLinks(key!, value as ISocialLinks);
+          break;
+        case 'updateNotificationSettings':
+          await userService.updateNotificationSettings(key!, value as INotificationSettings);
+          break;
+      }
     },
     {
       concurrency: 5,
