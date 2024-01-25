@@ -7,12 +7,12 @@ import 'express-async-errors';
 import helmet from 'helmet';
 import hpp from 'hpp';
 import http from 'http';
-import { createClient } from 'redis';
 import routes from './routes';
 import { Server } from 'socket.io';
 import { cloudinaryConfig, config, validateConfig } from './config';
 import databseConnection from './setupDatabase';
 import { CustomError, IErrorResponse, NotFoundError } from './shared/globals/helpers/error-handler';
+import { redisClient } from '@service/redis/redisClient';
 const app = express();
 
 app.use(
@@ -73,8 +73,4 @@ const io = new Server(httpServer, {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
   }
 });
-const pubClient = createClient({ url: config.REDIS_HOST });
-const subClient = pubClient.duplicate();
-Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
-  io.adapter(createAdapter(pubClient, subClient));
-});
+io.adapter(createAdapter(redisClient, redisClient.duplicate()));

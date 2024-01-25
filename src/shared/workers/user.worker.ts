@@ -1,4 +1,5 @@
 import * as userService from '@service/db/user.service';
+import { redisClient } from '@service/redis/redisClient';
 import { IBasicInfo, INotificationSettings, ISocialLinks, IUserDocument } from '@user/interfaces/user.interface';
 import { Job, Worker } from 'bullmq';
 
@@ -25,10 +26,7 @@ export const instantiatieUserWorker = (queueName: string) => {
     },
     {
       concurrency: 5,
-      connection: {
-        host: 'localhost',
-        port: 6379
-      }
+      connection: redisClient
     }
   );
 };

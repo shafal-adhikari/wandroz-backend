@@ -17,15 +17,12 @@ export const savePostToCache = async (data: ISavePostToCache): Promise<void> => 
   }
   list = [...list, 'createdAt', `${createdAt}`];
   try {
-    if (!redisClient.isOpen) {
-      await redisClient.connect();
-    }
-    const postCount: string[] = await redisClient.HMGET(`users:${data.currentUserId}`, 'postsCount');
+    const postCount: (string | null)[] = await redisClient.hmget(`users:${data.currentUserId}`, 'postsCount');
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
-    await redisClient.ZADD('post', { score: parseInt(data.uId, 10), value: `${data.key}` });
-    multi.HSET(`posts:${data.key}`, list);
-    const count: number = parseInt(postCount[0]) + 1;
-    multi.HSET(`users:${data.currentUserId}`, ['postsCount', count]);
+    await redisClient.zadd('post', parseInt(data.uId, 10), `${data.key}`);
+    multi.hset(`posts:${data.key}`, list);
+    const count: number = parseInt(postCount[0] ?? '0') + 1;
+    multi.hset(`users:${data.currentUserId}`, ['postsCount', count]);
     multi.exec();
   } catch (error) {
     throw new ServerError();
@@ -34,14 +31,10 @@ export const savePostToCache = async (data: ISavePostToCache): Promise<void> => 
 
 export const getPostsFromCache = async (key: string, start: number, end: number): Promise<IPostDocument[]> => {
   try {
-    if (!redisClient.isOpen) {
-      await redisClient.connect();
-    }
-
-    const reply: string[] = await redisClient.ZRANGE(key, start, end, { REV: true });
+    const reply: string[] = await redisClient.zrevrange(key, start, end);
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
     for (const value of reply) {
-      multi.HGETALL(`posts:${value}`);
+      multi.hgetall(`posts:${value}`);
     }
     const replies = (await multi.exec()) as unknown as IPostDocument[];
     const postReplies: IPostDocument[] = [];
@@ -60,10 +53,7 @@ export const getPostsFromCache = async (key: string, start: number, end: number)
 
 export const getTotalPostsInCache = async (): Promise<number> => {
   try {
-    if (!redisClient.isOpen) {
-      await redisClient.connect();
-    }
-    const count: number = await redisClient.ZCARD('post');
+    const count: number = await redisClient.zcard('post');
     return count;
   } catch (error) {
     throw new ServerError();
@@ -72,14 +62,10 @@ export const getTotalPostsInCache = async (): Promise<number> => {
 
 export const getPostsWithImagesFromCache = async (key: string, start: number, end: number): Promise<IPostDocument[]> => {
   try {
-    if (!redisClient.isOpen) {
-      await redisClient.connect();
-    }
-
-    const reply: string[] = await redisClient.ZRANGE(key, start, end, { REV: true });
+    const reply: string[] = await redisClient.zrevrange(key, start, end);
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
     for (const value of reply) {
-      multi.HGETALL(`posts:${value}`);
+      multi.hgetall(`posts:${value}`);
     }
     const replies = (await multi.exec()) as unknown as IPostDocument[];
     const postWithImages: IPostDocument[] = [];
@@ -99,14 +85,10 @@ export const getPostsWithImagesFromCache = async (key: string, start: number, en
 
 export const getPostsWithVideosFromCache = async (key: string, start: number, end: number): Promise<IPostDocument[]> => {
   try {
-    if (!redisClient.isOpen) {
-      await redisClient.connect();
-    }
-
-    const reply: string[] = await redisClient.ZRANGE(key, start, end, { REV: true });
+    const reply: string[] = await redisClient.zrevrange(key, start, end);
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
     for (const value of reply) {
-      multi.HGETALL(`posts:${value}`);
+      multi.hgetall(`posts:${value}`);
     }
     const replies = (await multi.exec()) as unknown as IPostDocument[];
     const postWithVideos: IPostDocument[] = [];
@@ -126,13 +108,10 @@ export const getPostsWithVideosFromCache = async (key: string, start: number, en
 
 export const getUserPostsFromCache = async (key: string, uId: number): Promise<IPostDocument[]> => {
   try {
-    if (!redisClient.isOpen) {
-      await redisClient.connect();
-    }
-    const reply: string[] = await redisClient.ZRANGE(key, uId, uId, { REV: true, BY: 'SCORE' });
+    const reply: string[] = await redisClient.zrangebyscore(key, uId, uId);
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
     for (const value of reply) {
-      multi.HGETALL(`posts:${value}`);
+      multi.hgetall(`posts:${value}`);
     }
     const replies = (await multi.exec()) as unknown as IPostDocument[];
     const postReplies: IPostDocument[] = [];
@@ -150,10 +129,7 @@ export const getUserPostsFromCache = async (key: string, uId: number): Promise<I
 
 export const getTotalUserPostsInCache = async (uId: number): Promise<number> => {
   try {
-    if (!redisClient.isOpen) {
-      await redisClient.connect();
-    }
-    const count: number = await redisClient.ZCOUNT('post', uId, uId);
+    const count: number = await redisClient.zcount('post', uId, uId);
     return count;
   } catch (error) {
     throw new ServerError();
@@ -162,17 +138,14 @@ export const getTotalUserPostsInCache = async (uId: number): Promise<number> => 
 
 export const deletePostFromCache = async (key: string, currentUserId: string): Promise<void> => {
   try {
-    if (!redisClient.isOpen) {
-      await redisClient.connect();
-    }
-    const postCount: string[] = await redisClient.HMGET(`users:${currentUserId}`, 'postsCount');
+    const postCount: (string | null)[] = await redisClient.hmget(`users:${currentUserId}`, 'postsCount');
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
-    multi.ZREM('post', `${key}`);
-    multi.DEL(`posts:${key}`);
-    multi.DEL(`comments:${key}`);
-    multi.DEL(`reactions:${key}`);
-    const count: number = parseInt(postCount[0], 10) - 1;
-    multi.HSET(`users:${currentUserId}`, ['postsCount', count]);
+    multi.zrem('post', `${key}`);
+    multi.del(`posts:${key}`);
+    multi.del(`comments:${key}`);
+    multi.del(`reactions:${key}`);
+    const count: number = parseInt(postCount[0] ?? '0', 10) - 1;
+    multi.hset(`users:${currentUserId}`, ['postsCount', count]);
     await multi.exec();
   } catch (error) {
     throw new ServerError();
@@ -190,12 +163,9 @@ export const updatePostInCache = async (key: string, updatedPost: IPostDocument)
     }
   }
   try {
-    if (!redisClient.isOpen) {
-      await redisClient.connect();
-    }
-    await redisClient.HSET(`posts:${key}`, list);
+    await redisClient.hset(`posts:${key}`, list);
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
-    multi.HGETALL(`posts:${key}`);
+    multi.hgetall(`posts:${key}`);
     const reply = (await multi.exec()) as unknown as IPostDocument[];
     const postReply = reply as IPostDocument[];
     postReply[0].commentsCount = parseJson(`${postReply[0].commentsCount}`) as number;
