@@ -15,7 +15,7 @@ import { omit } from 'lodash';
 import { addAuthUserJob } from '@service/queues/auth.queue';
 import { addUserJob } from '@service/queues/user.queue';
 import JWT from 'jsonwebtoken';
-import { v4 as uuid } from 'uuid';
+import { generateRandomIntegers } from '@global/helpers/helpers';
 export const signUp = joiValidation(signupSchema)(async (req: Request, res: Response) => {
   const { username, email, password, avatarImage } = req.body;
   const checkIfUserExist: IAuthDocument = await getAuthUserByUsernameOrEmail(username, email.toLowerCase());
@@ -24,7 +24,7 @@ export const signUp = joiValidation(signupSchema)(async (req: Request, res: Resp
   }
   const authObjectId: ObjectId = new ObjectId();
   const userObjectId: ObjectId = new ObjectId();
-  const uId = uuid();
+  const uId = generateRandomIntegers(10).toString();
   const authData: IAuthDocument = signUpData({
     _id: authObjectId,
     uId,

@@ -3,10 +3,7 @@ import { IPostDocument } from '@post/interfaces/post.interface';
 
 const postSchema: Schema = new Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
-  username: { type: String },
   email: { type: String },
-  avatarColor: { type: String },
-  profilePicture: { type: String },
   post: { type: String, default: '' },
   bgColor: { type: String, default: '' },
   imgVersion: { type: String, default: '' },

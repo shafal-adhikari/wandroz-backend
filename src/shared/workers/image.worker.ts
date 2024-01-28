@@ -5,12 +5,20 @@ export const instantiatieImageWorker = (queueName: string) => {
   new Worker(
     queueName,
     async (job: Job) => {
-      const { value, key, imgId, imgVersion } = job.data;
+      const { value, key, imgId, imgVersion, imageId } = job.data;
 
       switch (job.name) {
         case 'addUserProfileImageToDB':
           await imageService.addUserProfileImageToDB(key, value, imgId, imgVersion);
           break;
+        case 'updateBGImageInDB':
+          await imageService.addBackgroundImageToDB(key, imgId, imgVersion);
+          break;
+        case 'addImageToDB':
+          await imageService.addImage(key, imgId, imgVersion, '');
+          break;
+        case 'removeImageFromDB':
+          await imageService.removeImageFromDB(imageId);
       }
     },
     {

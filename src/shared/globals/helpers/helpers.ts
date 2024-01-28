@@ -7,7 +7,6 @@ export const generateRandomIntegers: (integerLength: number) => number = (intege
   }
   return parseInt(result, 10);
 };
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const parseJson: (prop: string) => any = (prop) => {
   try {

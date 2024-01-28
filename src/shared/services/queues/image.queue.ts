@@ -1,9 +1,9 @@
 import { createQueue } from './createQueue';
-import { instantiatieUserWorker } from '@worker/user.worker';
 import { IFileImageJobData } from '@image/interfaces/image.interface';
+import { instantiatieImageWorker } from '@worker/image.worker';
 
 const { addJob } = createQueue('image');
-instantiatieUserWorker('image');
+instantiatieImageWorker('image');
 
 export const addImageJob = (name: string, data: IFileImageJobData): void => {
   addJob(name, data);

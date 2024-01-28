@@ -6,7 +6,6 @@ const postSchema: ObjectSchema = Joi.object().keys({
   privacy: Joi.string().optional().allow(null, ''),
   feelings: Joi.string().optional().allow(null, ''),
   gifUrl: Joi.string().optional().allow(null, ''),
-  profilePicture: Joi.string().optional().allow(null, ''),
   imgVersion: Joi.string().optional().allow(null, ''),
   imgId: Joi.string().optional().allow(null, ''),
   image: Joi.string().optional().allow(null, ''),

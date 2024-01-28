@@ -5,10 +5,6 @@ import mongoose, { Document } from 'mongoose';
 export interface IPostDocument extends Document {
   _id?: string | mongoose.Types.ObjectId;
   userId: string;
-  username: string;
-  email: string;
-  avatarColor: string;
-  profilePicture: string;
   post: string;
   bgColor: string;
   commentsCount: number;
@@ -25,7 +21,6 @@ export interface IPostDocument extends Document {
 
 export interface IGetPostsQuery {
   _id?: ObjectId | string;
-  username?: string;
   imgId?: string;
   gifUrl?: string;
   videoId?: string;

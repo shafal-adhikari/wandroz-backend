@@ -5,6 +5,7 @@ import { parseJson } from '@global/helpers/helpers';
 import { IReactions } from '@reactions/interfaces/reaction.interface';
 
 export const savePostToCache = async (data: ISavePostToCache): Promise<void> => {
+  console.log(data);
   const createdAt = new Date();
   let list: string[] = [];
   for (const [key, value] of Object.entries(data.createdPost)) {
@@ -19,7 +20,7 @@ export const savePostToCache = async (data: ISavePostToCache): Promise<void> => 
   try {
     const postCount: (string | null)[] = await redisClient.hmget(`users:${data.currentUserId}`, 'postsCount');
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
-    await redisClient.zadd('post', parseInt(data.uId, 10), `${data.key}`);
+    await redisClient.zadd('post', `${data.key}`);
     multi.hset(`posts:${data.key}`, list);
     const count: number = parseInt(postCount[0] ?? '0') + 1;
     multi.hset(`users:${data.currentUserId}`, ['postsCount', count]);
@@ -32,11 +33,13 @@ export const savePostToCache = async (data: ISavePostToCache): Promise<void> => 
 export const getPostsFromCache = async (key: string, start: number, end: number): Promise<IPostDocument[]> => {
   try {
     const reply: string[] = await redisClient.zrevrange(key, start, end);
+    console.log(reply);
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
     for (const value of reply) {
       multi.hgetall(`posts:${value}`);
     }
     const replies = (await multi.exec()) as unknown as IPostDocument[];
+    console.log(replies);
     const postReplies: IPostDocument[] = [];
     for (const post of replies) {
       post.commentsCount = parseJson(`${post.commentsCount}`) as number;

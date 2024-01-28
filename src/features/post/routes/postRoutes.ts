@@ -1,20 +1,24 @@
 import { checkAuthentication } from '@global/middlewares/auth-middleware';
+import { createPost, createPostWithImage, createPostWithVideo } from '@post/controllers/create-post';
+import { deletePost } from '@post/controllers/delete-post';
+import { getPosts, getPostsWithImages, getPostsWithVideos } from '@post/controllers/get-posts';
+import { updatePostWithImage, updatePostWithVideo, updatePosts } from '@post/controllers/update-post';
 import { Router } from 'express';
 
 const router = Router();
 
-router.get('/post/all/:page', checkAuthentication, Get.prototype.posts);
-router.get('/post/images/:page', checkAuthentication, Get.prototype.postsWithImages);
-router.get('/post/videos/:page', checkAuthentication, Get.prototype.postsWithVideos);
+router.get('/post/all/:page', checkAuthentication, getPosts);
+router.get('/post/images/:page', checkAuthentication, getPostsWithImages);
+router.get('/post/videos/:page', checkAuthentication, getPostsWithVideos);
 
-router.post('/post', checkAuthentication, Create.prototype.post);
-router.post('/post/image/post', checkAuthentication, Create.prototype.postWithImage);
-router.post('/post/video/post', checkAuthentication, Create.prototype.postWithVideo);
+router.post('/post', checkAuthentication, createPost);
+router.post('/post/image/post', checkAuthentication, createPostWithImage);
+router.post('/post/video/post', checkAuthentication, createPostWithVideo);
 
-router.put('/post/:postId', checkAuthentication, Update.prototype.posts);
-router.put('/post/image/:postId', checkAuthentication, Update.prototype.postWithImage);
-router.put('/post/video/:postId', checkAuthentication, Update.prototype.postWithVideo);
+router.put('/post/:postId', checkAuthentication, updatePosts);
+router.put('/post/image/:postId', checkAuthentication, updatePostWithImage);
+router.put('/post/video/:postId', checkAuthentication, updatePostWithVideo);
 
-router.delete('/post/:postId', checkAuthentication, Delete.prototype.post);
+router.delete('/post/:postId', checkAuthentication, deletePost);
 
 export const postRoutes = router;
