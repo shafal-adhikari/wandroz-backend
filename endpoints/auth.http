@@ -1,0 +1,56 @@
+@baseURL = http://localhost:5500
+@urlPath = api/v1
+
+@passwordResetToken = 296630e8-4236-4578-a107-be4a5219d3e2
+
+###
+POST {{baseURL}}/{{urlPath}}/signup
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+{
+  "username": "lofez",
+  "password": "jenny",
+  "email": "lol@gmail.com"
+}
+
+###
+POST {{baseURL}}/{{urlPath}}/login
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+{
+  "username": "lofez",
+  "password": "jenny"
+}
+
+###
+GET {{baseURL}}/{{urlPath}}/logout
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+POST {{baseURL}}/{{urlPath}}/forgot-password
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+{
+  "email": "jennyfer.tillman@ethereal.email"
+}
+
+
+###
+POST {{baseURL}}/{{urlPath}}/reset-password/{{passwordResetToken}}
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+{
+  "password": "safal12",
+  "confirmPassword": "safal12"
+}
+

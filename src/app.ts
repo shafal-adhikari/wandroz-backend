@@ -7,11 +7,12 @@ import 'express-async-errors';
 import helmet from 'helmet';
 import hpp from 'hpp';
 import http from 'http';
-import { createClient } from 'redis';
+import routes from './routes';
 import { Server } from 'socket.io';
-import { config, validateConfig } from './config';
+import { cloudinaryConfig, config, validateConfig } from './config';
 import databseConnection from './setupDatabase';
 import { CustomError, IErrorResponse, NotFoundError } from './shared/globals/helpers/error-handler';
+import { redisClient } from '@service/redis/redisClient';
 const app = express();
 
 app.use(
@@ -43,7 +44,7 @@ app.use(
     limit: '50mb'
   })
 );
-
+routes(app);
 app.use('*', () => {
   throw new NotFoundError();
 });
@@ -55,6 +56,7 @@ app.use((error: IErrorResponse, _req: Request, res: Response, next: NextFunction
   next();
 });
 validateConfig();
+cloudinaryConfig();
 databseConnection();
 const httpServer = new http.Server(app);
 const SERVER_PORT = 5500;
@@ -63,7 +65,7 @@ httpServer.listen(SERVER_PORT, () => {
   console.log(`Server running on port ${SERVER_PORT}`);
 });
 
-const io: Server = new Server(httpServer, {
+const io = new Server(httpServer, {
   cors: {
     origin: config.CLIENT_URL,
     credentials: true,
@@ -71,8 +73,4 @@ const io: Server = new Server(httpServer, {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
   }
 });
-const pubClient = createClient({ url: config.REDIS_HOST });
-const subClient = pubClient.duplicate();
-Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
-  io.adapter(createAdapter(pubClient, subClient));
-});
+io.adapter(createAdapter(redisClient, redisClient.duplicate()));
