@@ -2,14 +2,20 @@ import { IReactions } from '@reactions/interfaces/reaction.interface';
 import { ObjectId } from 'mongodb';
 import mongoose, { Document } from 'mongoose';
 
+export interface IPostImages {
+  imgVersion: string;
+  imgId: string;
+}
 export interface IPostDocument extends Document {
   _id?: string | mongoose.Types.ObjectId;
   userId: string;
   post: string;
   bgColor: string;
   commentsCount: number;
-  imgVersion?: string;
-  imgId?: string;
+  username?: string;
+  profilePicture?: string;
+  images?: IPostImages[];
+  videos?: IPostImages[];
   videoId?: string;
   videoVersion?: string;
   feelings?: string;
@@ -21,9 +27,9 @@ export interface IPostDocument extends Document {
 
 export interface IGetPostsQuery {
   _id?: ObjectId | string;
-  imgId?: string;
+  images?: string;
   gifUrl?: string;
-  videoId?: string;
+  videos?: string;
 }
 
 export interface ISavePostToCache {

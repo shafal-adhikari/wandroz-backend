@@ -5,6 +5,7 @@ import { IFileImageDocument } from '@image/interfaces/image.interface';
 import { addImageJob } from '@service/queues/image.queue';
 import * as imageService from '@service/db/image.service';
 import { updateSingleUserItemInCache } from '@service/redis/user.cache';
+
 export const deleteImage = async (req: Request, res: Response): Promise<void> => {
   const { imageId } = req.params;
   addImageJob('removeImageFromDB', {

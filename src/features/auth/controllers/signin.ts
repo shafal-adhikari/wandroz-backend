@@ -25,8 +25,7 @@ export const signIn = joiValidation(loginSchema)(async (req: Request, res: Respo
       userId: user._id,
       uId: existingUser.uId,
       email: existingUser.email,
-      username: existingUser.username,
-      avatarColor: existingUser.avatarColor
+      username: existingUser.username
     },
     config.JWT_TOKEN
   );
@@ -34,7 +33,6 @@ export const signIn = joiValidation(loginSchema)(async (req: Request, res: Respo
     ...user,
     username: existingUser.username,
     email: existingUser.email,
-    avatarColor: existingUser.avatarColor,
     authId: existingUser._id,
     uId: existingUser.uId,
     createdAt: existingUser.createdAt

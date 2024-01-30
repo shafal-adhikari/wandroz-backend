@@ -7,7 +7,6 @@ export interface IUserDocument extends Document {
   username?: string;
   email?: string;
   password?: string;
-  avatarColor?: string;
   uId?: string;
   postsCount: number;
   work: string;
@@ -59,7 +58,6 @@ export interface ISearchUser {
   profilePicture: string;
   username: string;
   email: string;
-  avatarColor: string;
 }
 
 export interface ISocketData {

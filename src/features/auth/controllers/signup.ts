@@ -43,7 +43,7 @@ export const signUp = joiValidation(signupSchema)(async (req: Request, res: Resp
     userDataToSave.profilePicture = `https://res.cloudinary.com/${config.CLOUD_NAME}/image/upload/v${result.version}/${userObjectId}`;
   }
   await saveUserToCache(`${userObjectId}`, uId, userDataToSave);
-  omit(userDataToSave, ['uId', 'username', 'email', 'password', 'avatarColor']);
+  omit(userDataToSave, ['uId', 'username', 'email', 'password']);
   addAuthUserJob('addAuthUserToDB', { value: authData });
   addUserJob('addAuthUserToDB', { value: userDataToSave });
   const jwtToken = generateSignUpToken(authData, userObjectId);
@@ -57,8 +57,7 @@ const generateSignUpToken = (data: IAuthDocument, userObjectId: ObjectId): strin
       userId: userObjectId,
       uId: data.uId,
       email: data.email,
-      username: data.username,
-      avatarColor: data.avatarColor
+      username: data.username
     },
     config.JWT_TOKEN,
     {
@@ -67,20 +66,19 @@ const generateSignUpToken = (data: IAuthDocument, userObjectId: ObjectId): strin
   );
 };
 const signUpData = (data: ISignUpData): IAuthDocument => {
-  const { _id, username, email, uId, password, avatarColor } = data;
+  const { _id, username, email, uId, password } = data;
   return {
     _id,
     uId,
     username,
     email: email.toLowerCase(),
     password,
-    avatarColor,
     createdAt: new Date()
   } as IAuthDocument;
 };
 
 const userData = (data: IAuthDocument, userObjectId: ObjectId): IUserDocument => {
-  const { _id, username, password, email, uId, avatarColor } = data;
+  const { _id, username, password, email, uId } = data;
   return {
     _id: userObjectId.toString(),
     authId: _id.toString(),
@@ -88,7 +86,6 @@ const userData = (data: IAuthDocument, userObjectId: ObjectId): IUserDocument =>
     password,
     email,
     uId,
-    avatarColor,
     profilePicture: '',
     blocked: [],
     blockedBy: [],
