@@ -23,7 +23,8 @@
     "paths": {
       "@auth/*": ["src/features/auth/*"],
       "@user/*": ["src/features/user/*"],
-      "@follower/*": ["src/features/follower/*"],
+      "@follower/*": ["src/features/followers/*"],
+      "@notification/*": ["src/features/notifications/*"],
       "@image/*": ["src/features/image/*"],
       "@post/*": ["src/features/post/*"],
       "@reactions/*": ["src/features/reactions/*"],

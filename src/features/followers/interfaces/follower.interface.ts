@@ -21,7 +21,6 @@ export interface IFollower {
 }
 
 export interface IFollowerData {
-  avatarColor: string;
   followersCount: number;
   followingCount: number;
   profilePicture: string;

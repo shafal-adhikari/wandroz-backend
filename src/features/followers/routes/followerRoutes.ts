@@ -1,28 +1,18 @@
-import express, { Router } from 'express';
-import { authMiddleware } from '@global/helpers/auth-middleware';
-import { Add } from '@follower/controllers/follower-user';
-import { Remove } from '@follower/controllers/unfollow-user';
-import { Get } from '@follower/controllers/get-followers';
-import { AddUser } from '@follower/controllers/block-user';
+import express from 'express';
+import { checkAuthentication } from '@global/middlewares/auth-middleware';
+import { getUserFollowers, getUserFollowing } from '@follower/controllers/get-followers';
+import { updateFollower } from '@follower/controllers/follower-user';
+import { removeFollower } from '@follower/controllers/unfollow-user';
+import { block, unblock } from '@follower/controllers/block-user';
 
-class FollowerRoutes {
-  private router: Router;
+const router = express.Router();
 
-  constructor() {
-    this.router = express.Router();
-  }
+router.get('/user/following', checkAuthentication, getUserFollowing);
+router.get('/user/followers/:userId', checkAuthentication, getUserFollowers);
 
-  public routes(): Router {
-    this.router.get('/user/following', authMiddleware.checkAuthentication, Get.prototype.userFollowing);
-    this.router.get('/user/followers/:userId', authMiddleware.checkAuthentication, Get.prototype.userFollowers);
+router.put('/user/follow/:followerId', checkAuthentication, updateFollower);
+router.put('/user/unfollow/:followeeId/:followerId', checkAuthentication, removeFollower);
+router.put('/user/block/:followerId', checkAuthentication, block);
+router.put('/user/unblock/:followerId', checkAuthentication, unblock);
 
-    this.router.put('/user/follow/:followerId', authMiddleware.checkAuthentication, Add.prototype.follower);
-    this.router.put('/user/unfollow/:followeeId/:followerId', authMiddleware.checkAuthentication, Remove.prototype.follower);
-    this.router.put('/user/block/:followerId', authMiddleware.checkAuthentication, AddUser.prototype.block);
-    this.router.put('/user/unblock/:followerId', authMiddleware.checkAuthentication, AddUser.prototype.unblock);
-
-    return this.router;
-  }
-}
-
-export const followerRoutes: FollowerRoutes = new FollowerRoutes();
+export const followerRoutes = router;
