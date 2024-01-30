@@ -7,7 +7,6 @@ export interface IUserDocument extends Document {
   username?: string;
   email?: string;
   password?: string;
-  avatarColor?: string;
   uId?: string;
   postsCount: number;
   work: string;
@@ -59,7 +58,6 @@ export interface ISearchUser {
   profilePicture: string;
   username: string;
   email: string;
-  avatarColor: string;
 }
 
 export interface ISocketData {
@@ -73,14 +71,14 @@ export interface ILogin {
 
 export interface IUserJobInfo {
   key?: string;
-  value?: string | ISocialLinks;
+  value?: string | ISocialLinks | IBasicInfo;
 }
 
 export interface IUserJob {
   keyOne?: string;
   keyTwo?: string;
   key?: string;
-  value?: string | INotificationSettings | IUserDocument;
+  value?: string | IUserDocument;
 }
 
 export interface IEmailJob {

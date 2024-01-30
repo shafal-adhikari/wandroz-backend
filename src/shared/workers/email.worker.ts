@@ -1,4 +1,5 @@
 import { sendEmail } from '@service/emails/mail-transport';
+import { redisClient } from '@service/redis/redisClient';
 import { IEmailJob } from '@user/interfaces/user.interface';
 import { Job, Worker } from 'bullmq';
 
@@ -12,10 +13,7 @@ export const instantiatieEmailWorker = (queueName: string) => {
     },
     {
       concurrency: 5,
-      connection: {
-        host: 'localhost',
-        port: 6379
-      }
+      connection: redisClient
     }
   );
 };

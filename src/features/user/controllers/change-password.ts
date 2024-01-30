@@ -9,10 +9,8 @@ import * as authService from '@service/db/auth.service';
 import { IAuthDocument } from '@auth/interfaces/auth.interface';
 import { passwordResetConfirmationTemplate } from '@service/emails/templates/reset-password/reset-password-template';
 import { addEmailJob } from '@service/queues/email.queue';
-import { joiValidation } from '@global/validations/joiValidations';
-import { passwordSchema } from '@auth/schemes/password';
 
-export const changePassword: (req: Request, res: Response) => Promise<void> = joiValidation(passwordSchema)(async (req, res) => {
+export const changePassword: (req: Request, res: Response) => Promise<void> = async (req, res) => {
   const { currentPassword, newPassword, confirmPassword } = req.body;
 
   if (newPassword !== confirmPassword) {
@@ -40,6 +38,6 @@ export const changePassword: (req: Request, res: Response) => Promise<void> = jo
   addEmailJob('changePassword', { template, receiverEmail: existingUser.email!, subject: 'Password update confirmation' });
 
   res.status(HTTP_STATUS.OK).json({
-    message: 'Password updated successfully. You will be redirected shortly to the login page.'
+    message: 'Password updated successfully'
   });
-});
+};

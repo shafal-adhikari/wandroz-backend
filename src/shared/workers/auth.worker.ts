@@ -1,5 +1,6 @@
 import { IAuthDocument, IAuthJob } from '@auth/interfaces/auth.interface';
 import { createAuthUser } from '@service/db/auth.service';
+import { redisClient } from '@service/redis/redisClient';
 import { Job, Worker } from 'bullmq';
 
 export const instantiatieAuthWorker = (queueName: string) => {
@@ -11,10 +12,7 @@ export const instantiatieAuthWorker = (queueName: string) => {
     },
     {
       concurrency: 5,
-      connection: {
-        host: 'localhost',
-        port: 6379
-      }
+      connection: redisClient
     }
   );
 };

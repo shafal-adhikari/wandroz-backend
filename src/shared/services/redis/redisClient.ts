@@ -1,18 +1,11 @@
 import { config } from '@root/config';
-import { createClient } from 'redis';
+import Redis from 'ioredis';
 
-export const redisClient = createClient({
-  url: config.REDIS_HOST
+export const redisClient = new Redis({
+  host: config.REDIS_HOST,
+  maxRetriesPerRequest: null
 });
 
-export const connectClient = () => {
-  redisClient
-    .connect()
-    .then(() => {
-      console.log('Conencted to Redis');
-    })
-    .catch((err) => {
-      console.log(err);
-      process.exit(0);
-    });
-};
+redisClient.on('connect', () => {
+  console.log('Redis client connected');
+});

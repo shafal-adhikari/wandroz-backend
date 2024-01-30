@@ -15,33 +15,35 @@ import { omit } from 'lodash';
 import { addAuthUserJob } from '@service/queues/auth.queue';
 import { addUserJob } from '@service/queues/user.queue';
 import JWT from 'jsonwebtoken';
-import { v4 as uuid } from 'uuid';
+import { generateRandomIntegers } from '@global/helpers/helpers';
 export const signUp = joiValidation(signupSchema)(async (req: Request, res: Response) => {
-  const { username, email, password, avatarColor, avatarImage } = req.body;
+  const { username, email, password, avatarImage } = req.body;
   const checkIfUserExist: IAuthDocument = await getAuthUserByUsernameOrEmail(username, email.toLowerCase());
   if (checkIfUserExist) {
     throw new BadRequestError('User already exists');
   }
   const authObjectId: ObjectId = new ObjectId();
   const userObjectId: ObjectId = new ObjectId();
-  const uId = uuid();
+  const uId = generateRandomIntegers(10).toString();
   const authData: IAuthDocument = signUpData({
     _id: authObjectId,
     uId,
     username,
     email,
-    password,
-    avatarColor
+    password
   });
-
-  const result = (await uploads(avatarImage, userObjectId.toString(), true, true)) as UploadApiResponse;
-  if (!result.public_id) {
-    throw new BadRequestError('Error uploading file. Please try again');
-  }
   const userDataToSave: IUserDocument = userData(authData, userObjectId);
-  userDataToSave.profilePicture = `https://res.cloudinary.com/${config.CLOUD_NAME}/image/upload/v${result.version}/${userObjectId}`;
+
+  if (avatarImage) {
+    const result = (await uploads(avatarImage, userObjectId.toString(), true, true)) as UploadApiResponse;
+
+    if (!result.public_id) {
+      throw new BadRequestError('Error uploading file. Please try again');
+    }
+    userDataToSave.profilePicture = `https://res.cloudinary.com/${config.CLOUD_NAME}/image/upload/v${result.version}/${userObjectId}`;
+  }
   await saveUserToCache(`${userObjectId}`, uId, userDataToSave);
-  omit(userDataToSave, ['uId', 'username', 'email', 'password', 'avatarColor']);
+  omit(userDataToSave, ['uId', 'username', 'email', 'password']);
   addAuthUserJob('addAuthUserToDB', { value: authData });
   addUserJob('addAuthUserToDB', { value: userDataToSave });
   const jwtToken = generateSignUpToken(authData, userObjectId);
@@ -55,8 +57,7 @@ const generateSignUpToken = (data: IAuthDocument, userObjectId: ObjectId): strin
       userId: userObjectId,
       uId: data.uId,
       email: data.email,
-      username: data.username,
-      avatarColor: data.avatarColor
+      username: data.username
     },
     config.JWT_TOKEN,
     {
@@ -65,20 +66,19 @@ const generateSignUpToken = (data: IAuthDocument, userObjectId: ObjectId): strin
   );
 };
 const signUpData = (data: ISignUpData): IAuthDocument => {
-  const { _id, username, email, uId, password, avatarColor } = data;
+  const { _id, username, email, uId, password } = data;
   return {
     _id,
     uId,
     username,
     email: email.toLowerCase(),
     password,
-    avatarColor,
     createdAt: new Date()
   } as IAuthDocument;
 };
 
 const userData = (data: IAuthDocument, userObjectId: ObjectId): IUserDocument => {
-  const { _id, username, password, email, uId, avatarColor } = data;
+  const { _id, username, password, email, uId } = data;
   return {
     _id: userObjectId.toString(),
     authId: _id.toString(),
@@ -86,7 +86,6 @@ const userData = (data: IAuthDocument, userObjectId: ObjectId): IUserDocument =>
     password,
     email,
     uId,
-    avatarColor,
     profilePicture: '',
     blocked: [],
     blockedBy: [],

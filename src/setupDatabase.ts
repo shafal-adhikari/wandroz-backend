@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { config } from './config';
-import { connectClient } from '@service/redis/redisClient';
 
 export default () => {
   const connect = () => {
@@ -8,7 +7,6 @@ export default () => {
       .connect(`${config.DATABASE_URL}`)
       .then(() => {
         console.log('Connected to DB');
-        connectClient();
       })
       .catch((error) => {
         console.log(error);

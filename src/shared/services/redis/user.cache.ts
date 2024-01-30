@@ -18,11 +18,8 @@ export const saveUserToCache = async (key: string, userId: string, createdUser: 
   }
   list = [...list, 'createdAt', `${createdAt}`];
   try {
-    if (!redisClient.isOpen) {
-      await redisClient.connect();
-    }
-    redisClient.ZADD('user', { score: parseInt(userId, 10), value: `${key}` });
-    redisClient.HSET(`users:${key}`, list);
+    redisClient.zadd('user', parseInt(userId, 10), `${key}`);
+    redisClient.hset(`users:${key}`, list);
   } catch (error) {
     throw new ServerError();
   }
@@ -30,10 +27,7 @@ export const saveUserToCache = async (key: string, userId: string, createdUser: 
 
 export const getUserFromCache = async (userId: string): Promise<IUserDocument | null> => {
   try {
-    if (!redisClient.isOpen) {
-      await redisClient.connect();
-    }
-    const response = (await redisClient.HGETALL(`users:${userId}`)) as unknown as IUserDocument;
+    const response = (await redisClient.hgetall(`users:${userId}`)) as unknown as IUserDocument;
     response.createdAt = new Date(parseJson(`${response.createdAt}`));
     response.blocked = parseJson(`${response.blocked}`);
     response.blockedBy = parseJson(`${response.blockedBy}`);
@@ -51,7 +45,7 @@ export const getUserFromCache = async (userId: string): Promise<IUserDocument | 
 export const updateSingleUserItemInCache = async (userId: string, prop: string, value: UserItem): Promise<IUserDocument | null> => {
   try {
     const dataToSave: string[] = [`${prop}`, JSON.stringify(value)];
-    await redisClient.HSET(`users:${userId}`, dataToSave);
+    await redisClient.hset(`users:${userId}`, dataToSave);
     const response: IUserDocument = (await getUserFromCache(userId)) as IUserDocument;
     return response;
   } catch (error) {
@@ -61,7 +55,7 @@ export const updateSingleUserItemInCache = async (userId: string, prop: string, 
 
 export const getTotalUsersInCache = async (): Promise<number> => {
   try {
-    const count: number = await redisClient.ZCARD('user');
+    const count: number = await redisClient.zcard('user');
     return count;
   } catch (error) {
     throw new ServerError();

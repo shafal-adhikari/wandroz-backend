@@ -81,7 +81,6 @@ export async function searchUsers(regex: RegExp): Promise<ISearchUser[]> {
         _id: '$user._id',
         username: 1,
         email: 1,
-        avatarColor: 1,
         profilePicture: 1
       }
     }
@@ -95,7 +94,6 @@ function aggregateProject() {
     username: '$authId.username',
     uId: '$authId.uId',
     email: '$authId.email',
-    avatarColor: '$authId.avatarColor',
     createdAt: '$authId.createdAt',
     postsCount: 1,
     work: 1,
