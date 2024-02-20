@@ -143,6 +143,8 @@ export const getUserPostsFromCache = async (key: string, uId: number): Promise<I
       post.commentsCount = parseJson(`${post.commentsCount}`) as number;
       post.reactions = parseJson(`${post.reactions}`) as IReactions;
       post.createdAt = new Date(parseJson(`${post.createdAt}`)) as Date;
+      post.images = parseJson(`${post.images}`);
+      post.videos = parseJson(`${post.videos}`);
       postReplies.push(post);
     }
     return postReplies;

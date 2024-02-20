@@ -24,11 +24,6 @@ export const getPosts = async (query: IGetPostsQuery, skip = 0, limit = 0, sort:
   return posts;
 };
 
-export const getPostsCount = async (): Promise<number> => {
-  const count: number = await PostModel.find({}).countDocuments();
-  return count;
-};
-
 export const deletePost = async (postId: string, userId: string): Promise<void> => {
   const post = await PostModel.findById(postId);
   if (post?.images?.length) {
@@ -46,4 +41,8 @@ export const deletePost = async (postId: string, userId: string): Promise<void> 
 export const editPost = async (postId: string, updatedPost: IPostDocument): Promise<void> => {
   const updatePost: UpdateQuery<IPostDocument> = PostModel.updateOne({ _id: postId }, { $set: updatedPost });
   await Promise.all([updatePost]);
+};
+export const getPostsCount = async (): Promise<number> => {
+  const count: number = await PostModel.find({}).countDocuments();
+  return count;
 };

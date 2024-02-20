@@ -5,11 +5,12 @@ import { Request, Response, NextFunction } from 'express';
 import JWT from 'jsonwebtoken';
 
 export const verifyUser = (req: Request, _res: Response, next: NextFunction) => {
-  if (!req.session?.jwt) {
+  const token = req.headers.authorization?.split(' ')[1] || req.session?.jwt;
+  if (!token) {
     throw new NotAuthorizedError();
   }
   try {
-    const payload: AuthPayload = JWT.verify(req.session.jwt, config.JWT_TOKEN) as AuthPayload;
+    const payload: AuthPayload = JWT.verify(token, config.JWT_TOKEN) as AuthPayload;
     req.currentUser = payload;
   } catch (error) {
     throw new NotAuthorizedError();

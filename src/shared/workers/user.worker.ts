@@ -10,6 +10,9 @@ export const instantiatieUserWorker = (queueName: string) => {
       const { value, key } = job.data;
 
       switch (job.name) {
+        case 'updateUserProfile':
+          await userService.updateUserProfile(key!, value as IUserDocument);
+          break;
         case 'addAuthUserToDB':
           await userService.addUserData(value as IUserDocument);
           break;

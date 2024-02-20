@@ -29,6 +29,7 @@ export interface IGetPostsQuery {
   _id?: ObjectId | string;
   images?: string;
   gifUrl?: string;
+  userId?: string;
   videos?: string;
 }
 

@@ -1,7 +1,7 @@
 import { ServerError } from '@global/helpers/error-handler';
 import { INotificationSettings, ISocialLinks, IUserDocument } from '@user/interfaces/user.interface';
 import { redisClient } from './redisClient';
-import { parseJson } from '@global/helpers/helpers';
+import { parseJson, shuffle } from '@global/helpers/helpers';
 
 type UserItem = string | ISocialLinks | INotificationSettings;
 
@@ -41,7 +41,43 @@ export const getUserFromCache = async (userId: string): Promise<IUserDocument | 
     throw new ServerError();
   }
 };
-
+export const getRandomUsersFromCache = async (userId: string): Promise<IUserDocument[]> => {
+  try {
+    const replies: IUserDocument[] = [];
+    const followers: string[] = await redisClient.lrange(`followers:${userId}`, 0, -1);
+    const users: string[] = await redisClient.zrange('user', 0, -1);
+    const randomUsers: string[] = shuffle(users).slice(0, 10);
+    for (const key of randomUsers) {
+      const followerIndex = followers.indexOf(key);
+      if (followerIndex < 0) {
+        const userHash: IUserDocument = (await redisClient.hgetall(`users:${key}`)) as unknown as IUserDocument;
+        replies.push(userHash);
+      }
+    }
+    const excludedIdIndex: number = replies.findIndex((data) => data._id == userId);
+    replies.splice(excludedIdIndex, 1);
+    for (const reply of replies) {
+      reply.createdAt = new Date(parseJson(`${reply.createdAt}`));
+      reply.postsCount = parseJson(`${reply.postsCount}`);
+      reply.blocked = parseJson(`${reply.blocked}`);
+      reply.blockedBy = parseJson(`${reply.blockedBy}`);
+      reply.notifications = parseJson(`${reply.notifications}`);
+      reply.social = parseJson(`${reply.social}`);
+      reply.followersCount = parseJson(`${reply.followersCount}`);
+      reply.followingCount = parseJson(`${reply.followingCount}`);
+      reply.bgImageId = parseJson(`${reply.bgImageId}`);
+      reply.bgImageVersion = parseJson(`${reply.bgImageVersion}`);
+      reply.profilePicture = parseJson(`${reply.profilePicture}`);
+      reply.work = parseJson(`${reply.work}`);
+      reply.school = parseJson(`${reply.school}`);
+      reply.location = parseJson(`${reply.location}`);
+      reply.quote = parseJson(`${reply.quote}`);
+    }
+    return replies;
+  } catch (error) {
+    throw new ServerError();
+  }
+};
 export const updateSingleUserItemInCache = async (userId: string, prop: string, value: UserItem): Promise<IUserDocument | null> => {
   try {
     const dataToSave: string[] = [`${prop}`, JSON.stringify(value)];

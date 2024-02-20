@@ -78,7 +78,7 @@ export interface IUserJob {
   keyOne?: string;
   keyTwo?: string;
   key?: string;
-  value?: string | IUserDocument;
+  value?: string | Partial<IUserDocument>;
 }
 
 export interface IEmailJob {

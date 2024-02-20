@@ -11,8 +11,8 @@ export interface INotificationDocument extends Document {
   comment: string;
   reaction: string;
   post: string;
-  imgId: string;
-  imgVersion: string;
+  imgId?: string;
+  imgVersion?: string;
   gifUrl: string;
   read?: boolean;
   createdAt?: Date;
@@ -30,8 +30,8 @@ export interface INotification {
   comment: string;
   reaction: string;
   post: string;
-  imgId: string;
-  imgVersion: string;
+  imgId?: string;
+  imgVersion?: string;
   gifUrl: string;
 }
 

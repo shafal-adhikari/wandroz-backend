@@ -8,6 +8,12 @@ Accept: application/json
 withCredentials: true
 
 ###
+GET {{baseUrl}}/{{urlPath}}/user/posts/65ba8cc6febcc9ceb0c3e535
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
 GET {{baseUrl}}/{{urlPath}}/user/profile/<userId>
 Content-Type: application/json
 Accept: application/json

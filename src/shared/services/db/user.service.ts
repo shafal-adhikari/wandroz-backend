@@ -2,15 +2,50 @@ import { IBasicInfo, ISearchUser, IUserDocument, ISocialLinks, INotificationSett
 import { UserModel } from '@user/models/user.schema';
 import mongoose from 'mongoose';
 import { AuthModel } from '@auth/models/auth.schema';
-
+import * as followerService from './follower.service';
 export async function addUserData(data: IUserDocument): Promise<void> {
   await UserModel.create(data);
 }
 
+export const updateUserProfile = async (userId: string, data: IUserDocument): Promise<void> => {
+  await UserModel.updateOne({ _id: userId }, data).exec();
+};
+
 export async function updatePassword(username: string, hashedPassword: string): Promise<void> {
   await AuthModel.updateOne({ username }, { $set: { password: hashedPassword } }).exec();
 }
-
+export async function getRandomUsers(userId: string): Promise<IUserDocument[]> {
+  const randomUsers: IUserDocument[] = [];
+  const users: IUserDocument[] = await UserModel.aggregate([
+    { $match: { _id: { $ne: new mongoose.Types.ObjectId(userId) } } },
+    { $lookup: { from: 'Auth', localField: 'authId', foreignField: '_id', as: 'authId' } },
+    { $unwind: '$authId' },
+    { $sample: { size: 10 } },
+    {
+      $addFields: {
+        username: '$authId.username',
+        email: '$authId.email',
+        avatarColor: '$authId.avatarColor',
+        uId: '$authId.uId',
+        createdAt: '$authId.createdAt'
+      }
+    },
+    {
+      $project: {
+        authId: 0,
+        __v: 0
+      }
+    }
+  ]);
+  const followers: string[] = await followerService.getFolloweesIds(`${userId}`);
+  for (const user of users) {
+    const followerIndex = followers.indexOf(user._id.toString());
+    if (followerIndex < 0) {
+      randomUsers.push(user);
+    }
+  }
+  return randomUsers;
+}
 export async function updateUserInfo(userId: string, info: IBasicInfo): Promise<void> {
   await UserModel.updateOne(
     { _id: userId },

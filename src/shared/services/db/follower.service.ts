@@ -7,10 +7,10 @@ import { IQueryDeleted, IQueryComplete } from '@post/interfaces/post.interface';
 import { IUserDocument } from '@user/interfaces/user.interface';
 import { INotificationDocument, INotificationTemplate } from '@notification/interfaces/notification.interface';
 import { NotificationModel } from '@notification/models/notification.schema';
-import { notificationTemplate } from '@service/emails/templates/notifications/notification-template';
 import { addEmailJob } from '@service/queues/email.queue';
 import { map } from 'lodash';
 import { getUserFromCache } from '@service/redis/user.cache';
+import { notificationMessageTemplate } from '@service/emails/templates/notifications/notification-template';
 
 export const addFollowerToDB = async (
   userId: string,
@@ -66,7 +66,7 @@ export const addFollowerToDB = async (
       message: `${username} is now following you.`,
       header: 'Follower Notification'
     };
-    const template: string = notificationTemplate.notificationMessageTemplate(templateParams);
+    const template: string = notificationMessageTemplate(templateParams);
     addEmailJob('followersEmail', {
       receiverEmail: response[1].email!,
       template,
