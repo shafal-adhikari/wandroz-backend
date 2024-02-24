@@ -14,25 +14,25 @@ Accept: application/json
 withCredentials: true
 
 ###
-GET {{baseUrl}}/{{urlPath}}/user/profile/<userId>
+GET {{baseUrl}}/{{urlPath}}/user/profile/65d9718cdbc6c0da4bc94d74
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
 
 ###
-GET {{baseUrl}}/{{urlPath}}/user/profile/posts/<username>/<userId>/<uId>
+GET {{baseUrl}}/{{urlPath}}/user/profile/posts/<userId>/<uId>
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
 
 ###
-GET {{baseUrl}}/{{urlPath}}/user/profile/user/suggestions
+GET {{baseUrl}}/{{urlPath}}/user/user-suggestions
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
 
 ###
-GET {{baseUrl}}/{{urlPath}}/user/profile/search/sadfafas
+GET {{baseUrl}}/{{urlPath}}/user/search/shaf
 Content-Type: application/json
 Accept: application/json
 withCredentials: true

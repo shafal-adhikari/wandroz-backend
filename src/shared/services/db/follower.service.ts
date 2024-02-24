@@ -2,7 +2,7 @@ import { FollowerModel } from '@follower/models/follower.schema';
 import { UserModel } from '@user/models/user.schema';
 import { ObjectId, BulkWriteResult } from 'mongodb';
 import mongoose, { Query } from 'mongoose';
-import { IFollowerData, IFollowerDocument } from '@follower/interfaces/follower.interface';
+import { FollowerStatus, IFollowerData, IFollowerDocument } from '@follower/interfaces/follower.interface';
 import { IQueryDeleted, IQueryComplete } from '@post/interfaces/post.interface';
 import { IUserDocument } from '@user/interfaces/user.interface';
 import { INotificationDocument, INotificationTemplate } from '@notification/interfaces/notification.interface';
@@ -16,7 +16,8 @@ export const addFollowerToDB = async (
   userId: string,
   followeeId: string,
   username: string,
-  followerDocumentId: ObjectId
+  followerDocumentId: ObjectId,
+  status: FollowerStatus
 ): Promise<void> => {
   const followeeObjectId: ObjectId = new mongoose.Types.ObjectId(followeeId);
   const followerObjectId: ObjectId = new mongoose.Types.ObjectId(userId);
@@ -24,32 +25,36 @@ export const addFollowerToDB = async (
   const following = await FollowerModel.create({
     _id: followerDocumentId,
     followeeId: followeeObjectId,
-    followerId: followerObjectId
+    followerId: followerObjectId,
+    status: status
   });
-
-  const users: Promise<BulkWriteResult> = UserModel.bulkWrite([
-    {
-      updateOne: {
-        filter: { _id: userId },
-        update: { $inc: { followingCount: 1 } }
+  let response: [BulkWriteResult | null, IUserDocument | null];
+  if (status == FollowerStatus.COMPLETE) {
+    const users: Promise<BulkWriteResult> = UserModel.bulkWrite([
+      {
+        updateOne: {
+          filter: { _id: userId },
+          update: { $inc: { followingCount: 1 } }
+        }
+      },
+      {
+        updateOne: {
+          filter: { _id: followeeId },
+          update: { $inc: { followersCount: 1 } }
+        }
       }
-    },
-    {
-      updateOne: {
-        filter: { _id: followeeId },
-        update: { $inc: { followersCount: 1 } }
-      }
-    }
-  ]);
-
-  const response: [BulkWriteResult, IUserDocument | null] = await Promise.all([users, getUserFromCache(followeeId)]);
+    ]);
+    response = await Promise.all([users, getUserFromCache(followeeId)]);
+  } else {
+    response = [null, await getUserFromCache(followeeId)];
+  }
 
   if (response[1]?.notifications.follows && userId !== followeeId) {
     const notificationModel: INotificationDocument = new NotificationModel();
     await notificationModel.insertNotification({
       userFrom: userId,
       userTo: followeeId,
-      message: `${username} is now following you.`,
+      message: status == FollowerStatus.COMPLETE ? `${username} is now following you.` : `${username} sent a follow request`,
       notificationType: 'follows',
       entityId: new mongoose.Types.ObjectId(userId),
       createdItemId: new mongoose.Types.ObjectId(following._id),
@@ -62,7 +67,6 @@ export const addFollowerToDB = async (
       reaction: ''
     });
     const templateParams: INotificationTemplate = {
-      username: response[1].username!,
       message: `${username} is now following you.`,
       header: 'Follower Notification'
     };
@@ -70,11 +74,64 @@ export const addFollowerToDB = async (
     addEmailJob('followersEmail', {
       receiverEmail: response[1].email!,
       template,
-      subject: `${username} is now following you.`
+      subject: status == FollowerStatus.COMPLETE ? `${username} is now following you.` : `${username} has sent a follow request`
     });
   }
 };
+export const updateFollowerStatusToDB = async (followerId: string, followeeId: string, status: boolean): Promise<void> => {
+  console.log(followerId, followeeId);
+  if (status == false) {
+    await FollowerModel.deleteOne({ followerId, followeeId });
+    return;
+  } else {
+    const follow = await FollowerModel.findOneAndUpdate({ followerId, followeeId }, { status: FollowerStatus.COMPLETE });
+    if (!follow) return;
+    const users: Promise<BulkWriteResult> = UserModel.bulkWrite([
+      {
+        updateOne: {
+          filter: { _id: follow?.followerId },
+          update: { $inc: { followingCount: 1 } }
+        }
+      },
+      {
+        updateOne: {
+          filter: { _id: follow?.followeeId },
+          update: { $inc: { followersCount: 1 } }
+        }
+      }
+    ]);
+    const response = await Promise.all([users, getUserFromCache(follow.followerId.toString())]);
 
+    if (response[1]?.notifications.follows) {
+      const notificationModel: INotificationDocument = new NotificationModel();
+      await notificationModel.insertNotification({
+        userFrom: follow.followeeId.toString(),
+        userTo: follow.followerId.toString(),
+        message: `${response[1].firstName} ${response[1].lastName} accepted your follow request`,
+        notificationType: 'follows',
+        entityId: follow.followeeId,
+        createdItemId: new mongoose.Types.ObjectId(follow._id),
+        createdAt: new Date(),
+        comment: '',
+        post: '',
+        imgId: '',
+        imgVersion: '',
+        gifUrl: '',
+        reaction: ''
+      });
+      const templateParams: INotificationTemplate = {
+        message: `${response[1].firstName} ${response[1].lastName} accepted your follow request`,
+        header: 'Follower Notification'
+      };
+      const template: string = notificationMessageTemplate(templateParams);
+      addEmailJob('followersEmail', {
+        receiverEmail: response[1].email!,
+        template,
+        subject: `${response[1].firstName} ${response[1].lastName} accepted your follow request`
+      });
+    }
+  }
+};
 export const removeFollowerFromDB = async (followeeId: string, followerId: string): Promise<void> => {
   const followeeObjectId: ObjectId = new mongoose.Types.ObjectId(followeeId);
   const followerObjectId: ObjectId = new mongoose.Types.ObjectId(followerId);
@@ -83,6 +140,8 @@ export const removeFollowerFromDB = async (followeeId: string, followerId: strin
     followeeId: followeeObjectId,
     followerId: followerObjectId
   });
+
+  console.log(unfollow);
 
   const users: Promise<BulkWriteResult> = UserModel.bulkWrite([
     {
@@ -101,67 +160,40 @@ export const removeFollowerFromDB = async (followeeId: string, followerId: strin
 
   await Promise.all([unfollow, users]);
 };
-
-export const getFolloweeData = async (userObjectId: ObjectId): Promise<IFollowerData[]> => {
+export const getFolloweeData = async (
+  userObjectId: ObjectId,
+  status: FollowerStatus = FollowerStatus.COMPLETE
+): Promise<IFollowerData[]> => {
   const followee: IFollowerData[] = await FollowerModel.aggregate([
-    { $match: { followerId: userObjectId } },
+    { $match: { followerId: userObjectId, status } },
     { $lookup: { from: 'User', localField: 'followeeId', foreignField: '_id', as: 'followeeId' } },
     { $unwind: '$followeeId' },
-    { $lookup: { from: 'Auth', localField: 'followeeId.authId', foreignField: '_id', as: 'authId' } },
-    { $unwind: '$authId' },
-    {
-      $addFields: {
-        _id: '$followeeId._id',
-        username: '$authId.username',
-        avatarColor: '$authId.avatarColor',
-        uId: '$authId.uId',
-        postCount: '$followeeId.postsCount',
-        followersCount: '$followeeId.followersCount',
-        followingCount: '$followeeId.followingCount',
-        profilePicture: '$followeeId.profilePicture',
-        userProfile: '$followeeId'
-      }
-    },
     {
       $project: {
-        authId: 0,
-        followerId: 0,
-        followeeId: 0,
-        createdAt: 0,
-        __v: 0
+        _id: '$followeeId._id',
+        firstName: '$followeeId.firstName',
+        lastName: '$followeeId.lastName',
+        profilePicture: '$followeeId.profilePicture'
       }
     }
   ]);
   return followee;
 };
 
-export const getFollowerData = async (userObjectId: ObjectId): Promise<IFollowerData[]> => {
+export const getFollowerData = async (
+  userObjectId: ObjectId,
+  status: FollowerStatus = FollowerStatus.COMPLETE
+): Promise<IFollowerData[]> => {
   const follower: IFollowerData[] = await FollowerModel.aggregate([
-    { $match: { followeeId: userObjectId } },
+    { $match: { followeeId: userObjectId, status } },
     { $lookup: { from: 'User', localField: 'followerId', foreignField: '_id', as: 'followerId' } },
     { $unwind: '$followerId' },
-    { $lookup: { from: 'Auth', localField: 'followerId.authId', foreignField: '_id', as: 'authId' } },
-    { $unwind: '$authId' },
-    {
-      $addFields: {
-        _id: '$followerId._id',
-        username: '$authId.username',
-        avatarColor: '$authId.avatarColor',
-        uId: '$authId.uId',
-        postCount: '$followerId.postsCount',
-        followersCount: '$followerId.followersCount',
-        followingCount: '$followerId.followingCount',
-        profilePicture: '$followerId.profilePicture',
-        userProfile: '$followerId'
-      }
-    },
     {
       $project: {
-        authId: 0,
-        followerId: 0,
-        followeeId: 0,
-        createdAt: 0,
-        __v: 0
+        _id: '$followerId._id',
+        firstName: '$followerId.firstName',
+        lastName: '$followerId.lastName',
+        profilePicture: '$followerId.profilePicture'
       }
     }
   ]);

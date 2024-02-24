@@ -4,9 +4,10 @@ import { ObjectId } from 'mongodb';
 export interface IUserDocument extends Document {
   _id: string | ObjectId;
   authId: string | ObjectId;
-  username?: string;
+  firstName: string;
+  lastName: string;
+  privacy: AccountPrivacy;
   email?: string;
-  password?: string;
   uId?: string;
   postsCount: number;
   work: string;
@@ -26,12 +27,14 @@ export interface IUserDocument extends Document {
 }
 
 export interface IResetPasswordParams {
-  username: string;
   email: string;
   ipaddress: string;
   date: string;
 }
-
+export enum AccountPrivacy {
+  PRIVATE = 'PRIVATE',
+  PUBLIC = 'PUBLIC'
+}
 export interface INotificationSettings {
   messages: boolean;
   reactions: boolean;
@@ -56,7 +59,6 @@ export interface ISocialLinks {
 export interface ISearchUser {
   _id: string;
   profilePicture: string;
-  username: string;
   email: string;
 }
 

@@ -1,4 +1,4 @@
-import { Queue } from 'bullmq';
+import { Queue, QueueEvents } from 'bullmq';
 import { createBullBoard } from '@bull-board/api';
 import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
@@ -23,6 +23,12 @@ export const createQueue = (queueName: string) => {
       }
     },
     connection: redisClient
+  });
+  const queueEvents = new QueueEvents(queueName, {
+    connection: redisClient
+  });
+  queueEvents.on('failed', ({ jobId, failedReason }) => {
+    console.log(`${jobId} failed with reason ${failedReason}`);
   });
   bullAdapters.push(new BullMQAdapter(queue));
   bullAdapters = [...new Set(bullAdapters)];

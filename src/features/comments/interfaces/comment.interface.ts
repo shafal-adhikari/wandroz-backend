@@ -3,7 +3,6 @@ import { Document } from 'mongoose';
 
 export interface ICommentDocument extends Document {
   _id?: string | ObjectId;
-  username: string;
   postId: string;
   profilePicture: string;
   comment: string;
@@ -15,7 +14,6 @@ export interface ICommentJob {
   postId: string;
   userTo: string;
   userFrom: string;
-  username: string;
   comment: ICommentDocument;
 }
 

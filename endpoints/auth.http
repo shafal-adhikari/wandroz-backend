@@ -10,9 +10,10 @@ Accept: application/json
 withCredentials: true
 
 {
-  "username": "lofez",
-  "password": "jenny",
-  "email": "lol@gmail.com"
+  "firstName": "Shafal",
+  "lastName": "Adhikari",
+  "email": "adhikarishafal0@gmail.com",
+  "password": "shafaladhikari"
 }
 
 ###
@@ -22,8 +23,8 @@ Accept: application/json
 withCredentials: true
 
 {
-  "username": "safal12",
-  "password": "safal12"
+  "email": "toy86@gmail.com",
+  "password": "password"
 }
 
 ###
@@ -41,7 +42,6 @@ withCredentials: true
 {
   "email": "jennyfer.tillman@ethereal.email"
 }
-
 
 ###
 POST {{baseURL}}/{{urlPath}}/reset-password/{{passwordResetToken}}

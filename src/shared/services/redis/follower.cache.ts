@@ -39,13 +39,9 @@ export const getFollowersFromCache = async (key: string): Promise<IFollowerData[
       const user: IUserDocument = (await getUserFromCache(item)) as IUserDocument;
       const data: IFollowerData = {
         _id: new mongoose.Types.ObjectId(user._id),
-        username: user.username!,
-        postCount: user.postsCount,
-        followersCount: user.followersCount,
-        followingCount: user.followingCount,
-        profilePicture: user.profilePicture,
-        uId: user.uId!,
-        userProfile: user
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePicture: user.profilePicture
       };
       list.push(data);
     }

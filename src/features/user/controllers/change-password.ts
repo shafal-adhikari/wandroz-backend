@@ -17,7 +17,7 @@ export const changePassword: (req: Request, res: Response) => Promise<void> = as
     throw new BadRequestError('Passwords do not match.');
   }
 
-  const existingUser: IAuthDocument = await authService.getAuthUserByUsername(req.currentUser!.username);
+  const existingUser: IAuthDocument = await authService.getAuthUserByEmail(req.currentUser!.email);
   const passwordsMatch: boolean = await existingUser.comparePassword(currentPassword);
 
   if (!passwordsMatch) {
@@ -25,10 +25,9 @@ export const changePassword: (req: Request, res: Response) => Promise<void> = as
   }
 
   const hashedPassword: string = await existingUser.hashPassword(newPassword);
-  userService.updatePassword(req.currentUser!.username, hashedPassword);
+  userService.updatePassword(req.currentUser!.userId, hashedPassword);
 
   const templateParams: IResetPasswordParams = {
-    username: existingUser.username!,
     email: existingUser.email!,
     ipaddress: publicIP.address(),
     date: moment().format('DD/MM/YYYY HH:mm')

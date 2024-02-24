@@ -12,7 +12,6 @@ export interface IPostDocument extends Document {
   post: string;
   bgColor: string;
   commentsCount: number;
-  username?: string;
   profilePicture?: string;
   images?: IPostImages[];
   videos?: IPostImages[];

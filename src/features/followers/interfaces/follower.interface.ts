@@ -5,6 +5,10 @@ import { IUserDocument } from '@user/interfaces/user.interface';
 export interface IFollowers {
   userId: string;
 }
+export enum FollowerStatus {
+  PENDING = 'PENDING',
+  COMPLETE = 'COMPLETE'
+}
 
 export interface IFollowerDocument extends Document {
   _id: mongoose.Types.ObjectId | string;
@@ -21,12 +25,9 @@ export interface IFollower {
 }
 
 export interface IFollowerData {
-  followersCount: number;
-  followingCount: number;
+  firstName: string;
+  lastName: string;
   profilePicture: string;
-  postCount: number;
-  username: string;
-  uId: string;
   _id?: mongoose.Types.ObjectId;
   userProfile?: IUserDocument;
 }
@@ -36,6 +37,8 @@ export interface IFollowerJobData {
   keyTwo?: string;
   username?: string;
   followerDocumentId?: ObjectId;
+  status?: FollowerStatus;
+  acceptStatus?: boolean;
 }
 
 export interface IBlockedUserJobData {

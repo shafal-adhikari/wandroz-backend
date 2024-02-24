@@ -11,8 +11,8 @@ export const updateUserProfile = async (userId: string, data: IUserDocument): Pr
   await UserModel.updateOne({ _id: userId }, data).exec();
 };
 
-export async function updatePassword(username: string, hashedPassword: string): Promise<void> {
-  await AuthModel.updateOne({ username }, { $set: { password: hashedPassword } }).exec();
+export async function updatePassword(_id: string, hashedPassword: string): Promise<void> {
+  await AuthModel.updateOne({ _id }, { $set: { password: hashedPassword } }).exec();
 }
 export async function getRandomUsers(userId: string): Promise<IUserDocument[]> {
   const randomUsers: IUserDocument[] = [];
@@ -107,14 +107,20 @@ export async function getTotalUsersInDB(): Promise<number> {
 }
 
 export async function searchUsers(regex: RegExp): Promise<ISearchUser[]> {
-  const users = await AuthModel.aggregate([
-    { $match: { username: regex } },
-    { $lookup: { from: 'User', localField: '_id', foreignField: 'authId', as: 'user' } },
-    { $unwind: '$user' },
+  const users = await UserModel.aggregate([
+    {
+      $match: {
+        $or: [
+          { firstName: regex },
+          { lastName: regex },
+          { $expr: { $regexMatch: { input: { $concat: ['$firstName', ' ', '$lastName'] }, regex: regex } } }
+        ]
+      }
+    },
     {
       $project: {
-        _id: '$user._id',
-        username: 1,
+        firstName: 1,
+        lastName: 1,
         email: 1,
         profilePicture: 1
       }
@@ -127,6 +133,7 @@ function aggregateProject() {
   return {
     _id: 1,
     username: '$authId.username',
+    privacy: 1,
     uId: '$authId.uId',
     email: '$authId.email',
     createdAt: '$authId.createdAt',

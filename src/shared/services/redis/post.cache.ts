@@ -47,7 +47,6 @@ export const getPostsFromCache = async (key: string, start: number, end: number)
         throw error;
       }
       const user = (await redisClient.hgetall(`users:${post.userId}`)) as unknown as IUserDocument;
-      post.username = user.username;
       post.profilePicture = user.profilePicture;
       post.commentsCount = parseJson(`${post.commentsCount}`) as number;
       post.reactions = parseJson(`${post.reactions}`) as IReactions;

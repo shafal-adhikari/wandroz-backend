@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { getAllUsers, getProfilePosts, getUserProfile, profileByUserId } from '@user/controllers/get-profile';
+import { getAllUsers, getProfilePosts, getUserProfile, profileByUserId, randomUserSuggestions } from '@user/controllers/get-profile';
 import { searchUser } from '@user/controllers/search-user';
 import { changePassword } from '@user/controllers/change-password';
 import { updateBasicInfo, updateSocialLinks } from '@user/controllers/update-basic-info';
@@ -12,7 +12,8 @@ router.get('/user/all/:page', checkAuthentication, getAllUsers);
 router.get('/user/posts/:userId', checkAuthentication, getProfilePosts);
 router.get('/user/profile', checkAuthentication, getUserProfile);
 router.get('/user/profile/:userId', checkAuthentication, profileByUserId);
-router.get('/user/profile/search/:query', checkAuthentication, searchUser);
+router.get('/user/search/:query', checkAuthentication, searchUser);
+router.get('/user/user-suggestions', checkAuthentication, randomUserSuggestions);
 
 router.put('/user/profile/change-password', checkAuthentication, changePassword);
 router.put('/user/profile/basic-info', checkAuthentication, updateBasicInfo);

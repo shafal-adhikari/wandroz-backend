@@ -13,7 +13,7 @@ export const instantiatieUserWorker = (queueName: string) => {
         case 'updateUserProfile':
           await userService.updateUserProfile(key!, value as IUserDocument);
           break;
-        case 'addAuthUserToDB':
+        case 'addUserToDB':
           await userService.addUserData(value as IUserDocument);
           break;
         case 'updateBasicInfoInDB':

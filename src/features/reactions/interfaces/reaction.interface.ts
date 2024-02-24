@@ -3,8 +3,6 @@ import { Document } from 'mongoose';
 
 export interface IReactionDocument extends Document {
   _id?: string | ObjectId;
-  username: string;
-  avataColor: string;
   type: string;
   postId: string;
   profilePicture: string;
@@ -24,7 +22,6 @@ export interface IReactions {
 
 export interface IReactionJob {
   postId: string;
-  username: string;
   previousReaction: string;
   userTo?: string;
   userFrom?: string;

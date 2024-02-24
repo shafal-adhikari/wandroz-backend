@@ -13,7 +13,6 @@ export const addComment = joiValidation(addCommentSchema)(async (req: Request, r
   const commentData: ICommentDocument = {
     _id: commentObjectId,
     postId,
-    username: `${req.currentUser?.username}`,
     profilePicture,
     comment,
     createdAt: new Date()
@@ -24,7 +23,6 @@ export const addComment = joiValidation(addCommentSchema)(async (req: Request, r
     postId,
     userTo,
     userFrom: req.currentUser!.userId,
-    username: req.currentUser!.username,
     comment: commentData
   };
   addCommentJob('addCommentToDB', databaseCommentData);
