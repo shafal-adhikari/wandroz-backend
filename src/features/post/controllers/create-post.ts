@@ -10,10 +10,11 @@ import { UploadApiResponse } from 'cloudinary';
 import { uploads, videoUpload } from '@global/helpers/cloudinary-upload';
 import { savePostToCache } from '@service/redis/post.cache';
 import { addImageJob } from '@service/queues/image.queue';
+import mongoose from 'mongoose';
 
 export const createPost = joiValidation(postSchema)(async (req: Request, res: Response): Promise<void> => {
-  const { post, bgColor, privacy, gifUrl, feelings, images, videos } = req.body;
-  const postObjectId: ObjectId = new ObjectId();
+  const { post, privacy, feelings, images, videos, gifUrl } = req.body;
+  const postObjectId: ObjectId = new mongoose.Types.ObjectId();
   const postImages: {
     imgId: string;
     imgVersion: string;
@@ -43,21 +44,20 @@ export const createPost = joiValidation(postSchema)(async (req: Request, res: Re
       )
     : [];
   const createdPost: IPostDocument = {
-    _id: postObjectId,
+    _id: `${postObjectId}`,
     userId: req.currentUser!.userId,
     post,
-    bgColor,
     feelings,
     privacy,
-    gifUrl,
     commentsCount: 0,
+    gifUrl: gifUrl,
     images: images?.length ? postImages : [],
     videos: videos?.length ? postVideos : [],
     createdAt: new Date(),
     reactions: { like: 0, love: 0, happy: 0, sad: 0, wow: 0, angry: 0 }
   } as IPostDocument;
   await savePostToCache({
-    key: postObjectId,
+    key: `${postObjectId}`,
     currentUserId: req.currentUser!.userId,
     uId: req.currentUser!.uId,
     createdPost

@@ -18,12 +18,12 @@ export const acceptFollowStatus = async (req: Request, res: Response): Promise<v
     res.json({ message: 'Declined follow request' });
     return;
   }
-  const followersCount: Promise<void> = updateFollowersCountInCache(`${followerId}`, 'followersCount', 1);
-  const followeeCount: Promise<void> = updateFollowersCountInCache(`${req.currentUser!.userId}`, 'followingCount', 1);
+  const followersCount: Promise<void> = updateFollowersCountInCache(`${followerId}`, 'followingCount', 1);
+  const followeeCount: Promise<void> = updateFollowersCountInCache(`${req.currentUser!.userId}`, 'followersCount', 1);
   await Promise.all([followersCount, followeeCount]);
 
-  const addFollowerToCache: Promise<void> = saveFollowerToCache(`following:${req.currentUser!.userId}`, `${followerId}`);
-  const addFolloweeToCache: Promise<void> = saveFollowerToCache(`followers:${followerId}`, `${req.currentUser!.userId}`);
+  const addFollowerToCache: Promise<void> = saveFollowerToCache(`following:${followerId}`, `${req.currentUser!.userId}`);
+  const addFolloweeToCache: Promise<void> = saveFollowerToCache(`followers:${req.currentUser!.userId}`, `${followerId}`);
   await Promise.all([addFollowerToCache, addFolloweeToCache]);
 
   addFollowerJob('updateFollowerStatus', { keyOne: followerId, keyTwo: req.currentUser?.userId, acceptStatus: status });

@@ -22,7 +22,7 @@ withCredentials: true
 {}
 
 ###
-PUT {{baseUrl}}/{{urlPath}}/user/unfollow/65d9e575deee49335008b86b
+PUT {{baseUrl}}/{{urlPath}}/user/unfollow/65d9e57fdeee49335008b894
 Content-Type: application/json
 Accept: application/json
 withCredentials: true

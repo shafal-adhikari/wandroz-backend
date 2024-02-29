@@ -5,9 +5,11 @@ export interface IReactionDocument extends Document {
   _id?: string | ObjectId;
   type: string;
   postId: string;
-  profilePicture: string;
+  profilePicture?: string;
+  firstName?: string;
+  lastName?: string;
+  userId: string;
   createdAt?: Date;
-  userTo?: string | ObjectId;
   comment?: string;
 }
 

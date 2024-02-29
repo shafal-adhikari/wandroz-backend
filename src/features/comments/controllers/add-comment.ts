@@ -8,20 +8,19 @@ import { addCommentJob } from '@service/queues/comment.queue';
 import { savePostCommentToCache } from '@service/redis/comment.cache';
 
 export const addComment = joiValidation(addCommentSchema)(async (req: Request, res: Response): Promise<void> => {
-  const { userTo, postId, profilePicture, comment } = req.body;
+  const { postId, comment } = req.body;
   const commentObjectId: ObjectId = new ObjectId();
   const commentData: ICommentDocument = {
     _id: commentObjectId,
     postId,
-    profilePicture,
     comment,
+    userId: req.currentUser?.userId,
     createdAt: new Date()
   } as ICommentDocument;
   await savePostCommentToCache(postId, JSON.stringify(commentData));
 
   const databaseCommentData: ICommentJob = {
     postId,
-    userTo,
     userFrom: req.currentUser!.userId,
     comment: commentData
   };

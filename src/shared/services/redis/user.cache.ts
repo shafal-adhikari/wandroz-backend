@@ -80,7 +80,7 @@ export const getRandomUsersFromCache = async (userId: string): Promise<IUserDocu
 };
 export const updateSingleUserItemInCache = async (userId: string, prop: string, value: UserItem): Promise<IUserDocument | null> => {
   try {
-    const dataToSave: string[] = [`${prop}`, JSON.stringify(value)];
+    const dataToSave: string[] = [`${prop}`, typeof value == 'string' ? value : JSON.stringify(value)];
     await redisClient.hset(`users:${userId}`, dataToSave);
     const response: IUserDocument = (await getUserFromCache(userId)) as IUserDocument;
     return response;

@@ -8,6 +8,7 @@ export async function addUserData(data: IUserDocument): Promise<void> {
 }
 
 export const updateUserProfile = async (userId: string, data: IUserDocument): Promise<void> => {
+  console.log(userId, data);
   await UserModel.updateOne({ _id: userId }, data).exec();
 };
 
@@ -121,7 +122,6 @@ export async function searchUsers(regex: RegExp): Promise<ISearchUser[]> {
       $project: {
         firstName: 1,
         lastName: 1,
-        email: 1,
         profilePicture: 1
       }
     }
@@ -132,7 +132,8 @@ export async function searchUsers(regex: RegExp): Promise<ISearchUser[]> {
 function aggregateProject() {
   return {
     _id: 1,
-    username: '$authId.username',
+    firstName: 1,
+    lastName: 1,
     privacy: 1,
     uId: '$authId.uId',
     email: '$authId.email',

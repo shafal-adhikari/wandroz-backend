@@ -3,6 +3,7 @@ import { ICommentDocument, ICommentNameList } from '@comment/interfaces/comment.
 import { redisClient } from './redisClient';
 import { parseJson } from '@global/helpers/helpers';
 import { ServerError } from '@global/helpers/error-handler';
+import { IUserDocument } from '@user/interfaces/user.interface';
 
 export const savePostCommentToCache = async (postId: string, value: string): Promise<void> => {
   try {
@@ -22,7 +23,13 @@ export const getCommentsFromCache = async (postId: string): Promise<ICommentDocu
     const reply: string[] = await redisClient.lrange(`comments:${postId}`, 0, -1);
     const list: ICommentDocument[] = [];
     for (const item of reply) {
-      list.push(parseJson(item));
+      const comment: ICommentDocument = parseJson(item);
+      const user = (await redisClient.hgetall(`users:${comment.userId}`)) as unknown as IUserDocument;
+      console.log(user);
+      comment.firstName = user.firstName;
+      comment.lastName = user.lastName;
+      comment.profilePicture = user.profilePicture;
+      list.push(comment);
     }
     return list;
   } catch (error) {
@@ -37,7 +44,8 @@ export const getCommentsNamesFromCache = async (postId: string): Promise<ICommen
     const list: string[] = [];
     for (const item of comments) {
       const comment: ICommentDocument = parseJson(item) as ICommentDocument;
-      list.push(comment.username);
+      const user = (await redisClient.hgetall(`users:${comment.userId}`)) as unknown as IUserDocument;
+      list.push(`${user.firstName} ${user.lastName}`);
     }
     const response: ICommentNameList = {
       count: commentsCount,
@@ -59,7 +67,10 @@ export const getSingleCommentFromCache = async (postId: string, commentId: strin
     const result: ICommentDocument = find(list, (listItem: ICommentDocument) => {
       return listItem._id === commentId;
     }) as ICommentDocument;
-
+    const user = (await redisClient.hgetall(`users:${result.userId}`)) as unknown as IUserDocument;
+    result.firstName = user.firstName;
+    result.lastName = user.lastName;
+    result.profilePicture = user.profilePicture;
     return [result];
   } catch (error) {
     throw new ServerError();

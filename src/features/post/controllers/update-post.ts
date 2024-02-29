@@ -11,7 +11,7 @@ import { uploads, videoUpload } from '@global/helpers/cloudinary-upload';
 import { UploadApiResponse } from 'cloudinary';
 
 export const updatePosts = joiValidation(postSchema)(async (req: Request, res: Response): Promise<void> => {
-  const { post, bgColor, feelings, privacy, gifUrl, images, deletedImages, videos, deletedVideos } = req.body;
+  const { post, feelings, privacy, images, deletedImages, videos, deletedVideos, gifUrl } = req.body;
   const { postId } = req.params;
   deletedImages.forEach((imgId: string) => {
     addImageJob('removeImageFromDB', { imgId });
@@ -45,13 +45,12 @@ export const updatePosts = joiValidation(postSchema)(async (req: Request, res: R
   );
   const updatedPost: IPostDocument = {
     post,
-    bgColor,
     privacy,
     feelings,
-    gifUrl,
     videoId: '',
     images: images.length ? postImages : [],
     videos: videos.length ? postVideos : [],
+    gifUrl: gifUrl,
     videoVersion: ''
   } as IPostDocument;
 

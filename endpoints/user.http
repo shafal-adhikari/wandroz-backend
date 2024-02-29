@@ -8,13 +8,13 @@ Accept: application/json
 withCredentials: true
 
 ###
-GET {{baseUrl}}/{{urlPath}}/user/posts/65ba8cc6febcc9ceb0c3e535
+GET {{baseUrl}}/{{urlPath}}/user/posts/65d9e57edeee49335008b880
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
 
 ###
-GET {{baseUrl}}/{{urlPath}}/user/profile/65d9718cdbc6c0da4bc94d74
+GET {{baseUrl}}/{{urlPath}}/user/profile/65d9e57edeee49335008b880
 Content-Type: application/json
 Accept: application/json
 withCredentials: true

@@ -135,13 +135,12 @@ export const updateFollowerStatusToDB = async (followerId: string, followeeId: s
 export const removeFollowerFromDB = async (followeeId: string, followerId: string): Promise<void> => {
   const followeeObjectId: ObjectId = new mongoose.Types.ObjectId(followeeId);
   const followerObjectId: ObjectId = new mongoose.Types.ObjectId(followerId);
+  console.log(followeeObjectId, followerObjectId);
 
   const unfollow: Query<IQueryComplete & IQueryDeleted, IFollowerDocument> = FollowerModel.deleteOne({
     followeeId: followeeObjectId,
     followerId: followerObjectId
   });
-
-  console.log(unfollow);
 
   const users: Promise<BulkWriteResult> = UserModel.bulkWrite([
     {
@@ -203,6 +202,19 @@ export const getFollowerData = async (
 export const getFolloweesIds = async (userId: string): Promise<string[]> => {
   const followee = await FollowerModel.aggregate([
     { $match: { followerId: new mongoose.Types.ObjectId(userId) } },
+    {
+      $project: {
+        followeeId: 1,
+        _id: 0
+      }
+    }
+  ]);
+  return map(followee, (result) => result.followeeId.toString());
+};
+
+export const getPendingFolloweesId = async (userId: string): Promise<string[]> => {
+  const followee = await FollowerModel.aggregate([
+    { $match: { followerId: new mongoose.Types.ObjectId(userId), status: FollowerStatus.PENDING } },
     {
       $project: {
         followeeId: 1,

@@ -7,6 +7,8 @@ import { userRoutes } from '@user/routes/userRoutes';
 import { imageRoutes } from '@image/routes/imageRoutes';
 import { postRoutes } from '@post/routes/postRoutes';
 import { followerRoutes } from '@follower/routes/followerRoutes';
+import { commentRoutes } from '@comment/routes/commentRoutes';
+import { reactionRoutes } from '@reactions/routes/reactionRoutes';
 
 const BASE_PATH = '/api/v1';
 export default (app: Application) => {
@@ -17,4 +19,6 @@ export default (app: Application) => {
   app.use(BASE_PATH, verifyUser, imageRoutes);
   app.use(BASE_PATH, verifyUser, postRoutes);
   app.use(BASE_PATH, verifyUser, followerRoutes);
+  app.use(BASE_PATH, verifyUser, commentRoutes);
+  app.use(BASE_PATH, verifyUser, reactionRoutes);
 };

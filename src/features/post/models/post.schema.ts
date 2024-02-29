@@ -5,11 +5,9 @@ const postSchema: Schema = new Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
   email: { type: String },
   post: { type: String, default: '' },
-  bgColor: { type: String, default: '' },
   images: [{ imgId: { type: String, default: '' }, imgVersion: { type: String, default: '' } }],
   videos: [{ imgId: { type: String, default: '' }, imgVersion: { type: String, default: '' } }],
   feelings: { type: String, default: '' },
-  gifUrl: { type: String, default: '' },
   privacy: { type: String, default: '' },
   commentsCount: { type: Number, default: 0 },
   reactions: {
@@ -20,6 +18,7 @@ const postSchema: Schema = new Schema({
     sad: { type: Number, default: 0 },
     angry: { type: Number, default: 0 }
   },
+  gifUrl: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now }
 });
 

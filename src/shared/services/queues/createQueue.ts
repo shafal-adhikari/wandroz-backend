@@ -8,9 +8,10 @@ import { redisClient } from '@service/redis/redisClient';
 import { IPostJobData } from '@post/interfaces/post.interface';
 import { IFileImageJobData } from '@image/interfaces/image.interface';
 import { ICommentJob } from '@root/features/comments/interfaces/comment.interface';
+import { IReactionJob } from '@reactions/interfaces/reaction.interface';
 
 let bullAdapters: BullMQAdapter[] = [];
-type IBaseJobData = IAuthJob | IUserJob | IEmailJob | IUserJobInfo | IPostJobData | IFileImageJobData | ICommentJob;
+type IBaseJobData = IAuthJob | IUserJob | IEmailJob | IUserJobInfo | IPostJobData | IFileImageJobData | ICommentJob | IReactionJob;
 export let serverAdapter: ExpressAdapter;
 export const createQueue = (queueName: string) => {
   const queue = new Queue(queueName, {
