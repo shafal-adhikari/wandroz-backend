@@ -66,29 +66,6 @@ export const getReactionsFromCache = async (postId: string): Promise<[IReactionD
   }
 };
 
-export async function getSingleReactionByUsernameFromCache(postId: string, username: string) {
-  try {
-    const response: string[] = await redisClient.lrange(`reactions:${postId}`, 0, -1);
-    const list: IReactionDocument[] = [];
-    for (const item of response) {
-      list.push(parseJson(item));
-    }
-    const result: IReactionDocument = find(list, (listItem: IReactionDocument) => {
-      return listItem?.postId === postId && listItem?.userId === username;
-    }) as IReactionDocument;
-    if (result) {
-      const user = (await redisClient.hgetall(`users:${result.userId}`)) as unknown as IUserDocument;
-      result.firstName = user.firstName;
-      result.lastName = user.lastName;
-      result.profilePicture = user.profilePicture;
-    }
-
-    return result ? [result, 1] : [];
-  } catch (error) {
-    throw new ServerError();
-  }
-}
-
 function getPreviousReaction(response: string[], userId: string) {
   const list: IReactionDocument[] = [];
   for (const item of response) {

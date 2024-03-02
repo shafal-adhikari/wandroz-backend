@@ -26,6 +26,6 @@ Accept: application/json
 withCredentials: true
 
 {
-  "postId": "65df6f93fa8767acd22030a0",
+  "postId": "65e1808c8f31dca6a06f09bb",
   "comment": "I like this post. Thumbs Up"
 }

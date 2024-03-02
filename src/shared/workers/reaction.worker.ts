@@ -13,6 +13,8 @@ export const instantiateReactionWorker = (queueName: string) => {
         case 'addReactionToDB':
           await reactionService.addReactionDataToDB(data);
           break;
+        case 'removeReactionFromDB':
+          await reactionService.removeReactionDataFromDB(data);
       }
     },
     {

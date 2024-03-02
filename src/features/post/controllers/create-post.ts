@@ -13,12 +13,12 @@ import { addImageJob } from '@service/queues/image.queue';
 import mongoose from 'mongoose';
 
 export const createPost = joiValidation(postSchema)(async (req: Request, res: Response): Promise<void> => {
-  const { post, privacy, feelings, images, videos, gifUrl } = req.body;
+  const { post, privacy, images, feelings, videos, gifUrl } = req.body;
   const postObjectId: ObjectId = new mongoose.Types.ObjectId();
   const postImages: {
     imgId: string;
     imgVersion: string;
-  }[] = images
+  }[] = req.files
     ? await Promise.all(
         images?.map(async (image: string) => {
           const result: UploadApiResponse = (await uploads(image)) as UploadApiResponse;
