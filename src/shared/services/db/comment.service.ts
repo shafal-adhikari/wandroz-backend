@@ -20,7 +20,7 @@ export const addCommentToDB = async (commentData: ICommentJob): Promise<void> =>
   const response: [ICommentDocument, IPostDocument] = await Promise.all([comments, post]);
   const userTo = await UserModel.findOne({ _id: response[1].userId });
   const user = await UserModel.findOne({ _id: userFrom });
-  if (user && userTo && user.notifications.comments && userFrom !== userTo._id) {
+  if (user && userTo && userTo.notifications.comments && userFrom !== userTo._id.toString()) {
     const notificationModel: INotificationDocument = new NotificationModel();
     await notificationModel.insertNotification({
       userFrom,
@@ -32,9 +32,6 @@ export const addCommentToDB = async (commentData: ICommentJob): Promise<void> =>
       createdAt: new Date(),
       comment: comment.comment,
       post: response[1].post,
-      imgId: response[1].images?.[0].imgId,
-      imgVersion: response[1].images?.[0].imgVersion,
-      gifUrl: response[1].gifUrl!,
       reaction: ''
     });
     const templateParams: INotificationTemplate = {

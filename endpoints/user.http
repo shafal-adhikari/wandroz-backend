@@ -84,6 +84,6 @@ withCredentials: true
 {
   "messages": true,
   "reactions": true,
-  "comments": false,
+  "comments": true,
   "follows": true
 }

@@ -61,9 +61,6 @@ export const addFollowerToDB = async (
       createdAt: new Date(),
       comment: '',
       post: '',
-      imgId: '',
-      imgVersion: '',
-      gifUrl: '',
       reaction: ''
     });
     const templateParams: INotificationTemplate = {
@@ -114,9 +111,6 @@ export const updateFollowerStatusToDB = async (followerId: string, followeeId: s
         createdAt: new Date(),
         comment: '',
         post: '',
-        imgId: '',
-        imgVersion: '',
-        gifUrl: '',
         reaction: ''
       });
       const templateParams: INotificationTemplate = {

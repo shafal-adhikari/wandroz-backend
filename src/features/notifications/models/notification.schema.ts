@@ -13,28 +13,11 @@ const notificationSchema: Schema = new Schema({
   comment: { type: String, default: '' },
   reaction: { type: String, default: '' },
   post: { type: String, default: '' },
-  imgId: { type: String, default: '' },
-  imgVersion: { type: String, default: '' },
-  gifUrl: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now() }
 });
 
 notificationSchema.methods.insertNotification = async function (body: INotification) {
-  const {
-    userTo,
-    userFrom,
-    message,
-    notificationType,
-    entityId,
-    createdItemId,
-    createdAt,
-    comment,
-    reaction,
-    post,
-    imgId,
-    imgVersion,
-    gifUrl
-  } = body;
+  const { userTo, userFrom, message, notificationType, entityId, createdItemId, createdAt, comment, reaction, post } = body;
 
   await NotificationModel.create({
     userTo,
@@ -46,13 +29,10 @@ notificationSchema.methods.insertNotification = async function (body: INotificat
     createdAt,
     comment,
     reaction,
-    post,
-    imgId,
-    imgVersion,
-    gifUrl
+    post
   });
   try {
-    const notifications: INotificationDocument[] = await notificationService.getNotifications(userTo);
+    const notifications: INotificationDocument[] = await notificationService.getNotificationsFromDb(userTo);
     return notifications;
   } catch (error) {
     return error;

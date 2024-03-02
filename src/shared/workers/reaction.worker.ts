@@ -8,7 +8,6 @@ export const instantiateReactionWorker = (queueName: string) => {
     queueName,
     async (job: Job) => {
       const data = job.data as IReactionJob;
-      console.log(data, job.name, 'job coming');
       switch (job.name) {
         case 'addReactionToDB':
           await reactionService.addReactionDataToDB(data);

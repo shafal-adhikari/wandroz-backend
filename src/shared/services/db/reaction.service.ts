@@ -12,7 +12,6 @@ import { getUserFromCache } from '@service/redis/user.cache';
 export async function addReactionDataToDB(reactionData: IReactionJob): Promise<void> {
   try {
     const { postId, userFrom, type, previousReaction, reactionObject } = reactionData;
-    console.log(reactionData);
     let updatedReactionObject: IReactionDocument = reactionObject as IReactionDocument;
     if (previousReaction && previousReaction.length) {
       updatedReactionObject = omit(reactionObject, ['_id']);
@@ -33,23 +32,21 @@ export async function addReactionDataToDB(reactionData: IReactionJob): Promise<v
         { postId, type: previousReaction, userId: new mongoose.Types.ObjectId(reactionObject?.userId) },
         updatedReactionObject,
         { upsert: true }
-      )
+      ),
+      getUserFromCache(`${userFrom}`)
     ])) as unknown as [IUserDocument, IReactionDocument, IPostDocument];
-    if (post && updatedReaction[0].notifications.reactions && post.userId !== userFrom) {
+    if (post && updatedReaction[0].notifications.reactions && post.userId.toString() !== userFrom) {
       const notificationModel: INotificationDocument = new NotificationModel();
       await notificationModel.insertNotification({
         userFrom: userFrom as string,
         userTo: updatedReaction[0]._id as string,
-        message: `${updatedReaction[0].firstName} ${updatedReaction[0].lastName} reacted to your post.`,
+        message: `${updatedReaction[2].firstName} ${updatedReaction[2].lastName} reacted to your post.`,
         notificationType: 'reactions',
         entityId: new mongoose.Types.ObjectId(postId),
         createdItemId: new mongoose.Types.ObjectId(updatedReaction[1]._id!),
         createdAt: new Date(),
         comment: '',
         post: post.post,
-        imgId: post.images?.[0].imgId,
-        imgVersion: post.images?.[0].imgVersion,
-        gifUrl: post.gifUrl!,
         reaction: type!
       });
     }
