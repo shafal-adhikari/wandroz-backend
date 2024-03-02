@@ -18,7 +18,7 @@ export const createPost = joiValidation(postSchema)(async (req: Request, res: Re
   const postImages: {
     imgId: string;
     imgVersion: string;
-  }[] = req.files
+  }[] = images
     ? await Promise.all(
         images?.map(async (image: string) => {
           const result: UploadApiResponse = (await uploads(image)) as UploadApiResponse;

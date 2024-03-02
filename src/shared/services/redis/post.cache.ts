@@ -34,7 +34,7 @@ export const savePostToCache = async (data: ISavePostToCache): Promise<void> => 
 
 export const getPostsFromCache = async (key: string, start: number, end: number): Promise<IPostDocument[]> => {
   try {
-    const reply: string[] = await redisClient.zrange(key, start, end);
+    const reply: string[] = await redisClient.zrevrange(key, start, end);
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
     for (const value of reply) {
       multi.hgetall(`posts:${value}`);
@@ -131,7 +131,7 @@ export const getPostsWithVideosFromCache = async (key: string, start: number, en
 
 export const getUserPostsFromCache = async (key: string, uId: number): Promise<IPostDocument[]> => {
   try {
-    const reply: string[] = await redisClient.zrangebyscore(key, uId, uId);
+    const reply: string[] = await redisClient.zrevrangebyscore(key, uId, uId);
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
     for (const value of reply) {
       multi.hgetall(`posts:${value}`);
