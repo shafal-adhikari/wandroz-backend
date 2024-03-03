@@ -20,7 +20,7 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
     posts = cachedPosts;
     totalPosts = await getTotalPostsInCache();
   } else {
-    posts = await postService.getPosts(skip, limit, { createdAt: -1 });
+    posts = await postService.getPosts({ privacy: 'Public' }, skip, limit, { createdAt: -1 });
     totalPosts = await postService.getPostsCount();
   }
   posts = posts.map((post) => {

@@ -72,7 +72,11 @@ export const getProfilePosts = async (req: Request, res: Response): Promise<void
   }
   const cachedUserPosts: IPostDocument[] = await getUserPostsFromCache('post', parseInt(cachedUser.uId!, 10));
 
-  userPosts = cachedUserPosts.length ? cachedUserPosts : await postService.getPosts({ userId: userId }, 0, 100, { createdAt: -1 });
+  userPosts = cachedUserPosts.length
+    ? cachedUserPosts
+    : await postService.getPosts({ userId: userId, privacy: userId !== req.currentUser!.userId ? 'Public' : undefined }, 0, 100, {
+        createdAt: -1
+      });
   userPosts = userPosts.map((post) => {
     const reaction = post.allReactions?.find((reaction) => reaction.userId == req.currentUser?.userId);
     post.userReaction = reaction ? reaction.type : '';
