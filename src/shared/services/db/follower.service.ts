@@ -85,7 +85,6 @@ export const addFollowerToDB = async (
   }
 };
 export const updateFollowerStatusToDB = async (followerId: string, followeeId: string, status: boolean): Promise<void> => {
-  console.log(followerId, followeeId);
   if (status == false) {
     await FollowerModel.deleteOne({ followerId, followeeId });
     return;
@@ -106,7 +105,7 @@ export const updateFollowerStatusToDB = async (followerId: string, followeeId: s
         }
       }
     ]);
-    const response = await Promise.all([users, getUserFromCache(follow.followerId.toString())]);
+    const response = await Promise.all([users, getUserFromCache(follow.followeeId.toString())]);
 
     if (response[1]?.notifications.follows) {
       const notificationModel: INotificationDocument = new NotificationModel();

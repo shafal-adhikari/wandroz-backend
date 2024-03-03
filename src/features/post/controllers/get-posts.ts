@@ -15,11 +15,12 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
   let posts: IPostDocument[] = [];
   let totalPosts = 0;
   const cachedPosts: IPostDocument[] = await getPostsFromCache('post', newSkip, limit);
+  // cachedPosts = cachedPosts.filter(cache);
   if (cachedPosts.length) {
     posts = cachedPosts;
     totalPosts = await getTotalPostsInCache();
   } else {
-    posts = await postService.getPosts({}, skip, limit, { createdAt: -1 });
+    posts = await postService.getPosts(skip, limit, { createdAt: -1 });
     totalPosts = await postService.getPostsCount();
   }
   posts = posts.map((post) => {

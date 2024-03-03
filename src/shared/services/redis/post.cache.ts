@@ -77,7 +77,7 @@ export const getPostsFromCache = async (key: string, start: number, end: number)
       post.createdAt = new Date(parseJson(`${post.createdAt}`)) as Date;
       postReplies.push(post);
     }
-    return postReplies;
+    return postReplies.filter((post) => post.privacy !== 'Private');
   } catch (error) {
     throw new ServerError();
   }

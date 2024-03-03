@@ -12,16 +12,8 @@ export const addPostToDb = async (userId: string, createdPost: IPostDocument): P
 };
 
 export const getPosts = async (query: IGetPostsQuery, skip = 0, limit = 0, sort: Record<string, 1 | -1>): Promise<IPostDocument[]> => {
-  let postQuery = {};
-  if (query?.images && query?.gifUrl) {
-    postQuery = { $or: [{ images: { $exists: true, $ne: [] } }, { gifUrl: { $ne: '' } }] };
-  } else if (query?.videos) {
-    postQuery = { $or: [{ videos: { $exists: true, $ne: [] } }] };
-  } else {
-    postQuery = query;
-  }
   const posts: IPostDocument[] = await PostModel.aggregate([
-    { $match: postQuery },
+    { $match: { query } },
     {
       $lookup: {
         from: 'User',
@@ -115,6 +107,6 @@ export const editPost = async (postId: string, updatedPost: IPostDocument): Prom
   await Promise.all([updatePost]);
 };
 export const getPostsCount = async (): Promise<number> => {
-  const count: number = await PostModel.find({}).countDocuments();
+  const count: number = await PostModel.find({ privacy: 'Public' }).countDocuments();
   return count;
 };
