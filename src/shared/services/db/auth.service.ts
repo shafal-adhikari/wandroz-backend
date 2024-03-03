@@ -9,6 +9,11 @@ export const getAuthUserByEmail = async (email: string): Promise<IAuthDocument> 
   return user;
 };
 
+export const getAuthUserById = async (id: string): Promise<IAuthDocument> => {
+  const user = (await AuthModel.findOne({ _id: id }).exec()) as IAuthDocument;
+  return user;
+};
+
 export const createAuthUser = async (data: IAuthDocument): Promise<void> => {
   try {
     await AuthModel.create(data);

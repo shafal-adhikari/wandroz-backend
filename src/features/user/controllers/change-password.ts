@@ -12,7 +12,9 @@ import { addEmailJob } from '@service/queues/email.queue';
 
 export const changePassword: (req: Request, res: Response) => Promise<void> = async (req, res) => {
   const { currentPassword, newPassword, confirmPassword } = req.body;
-
+  if (newPassword == currentPassword) {
+    throw new BadRequestError('New Password cant be same as old password');
+  }
   if (newPassword !== confirmPassword) {
     throw new BadRequestError('Passwords do not match.');
   }
@@ -23,13 +25,15 @@ export const changePassword: (req: Request, res: Response) => Promise<void> = as
   if (!passwordsMatch) {
     throw new BadRequestError('Invalid credentials');
   }
-
+  const user = await userService.getUserByAuthId(existingUser._id.toString());
   const hashedPassword: string = await existingUser.hashPassword(newPassword);
   userService.updatePassword(req.currentUser!.userId, hashedPassword);
 
   const templateParams: IResetPasswordParams = {
     email: existingUser.email!,
     ipaddress: publicIP.address(),
+    firstName: user.firstName,
+    lastName: user.lastName,
     date: moment().format('DD/MM/YYYY HH:mm')
   };
 

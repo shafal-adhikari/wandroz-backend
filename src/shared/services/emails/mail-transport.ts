@@ -22,17 +22,16 @@ export const sendEmail = (receiverEmail: string, subject: string, body: string) 
 };
 
 const developmentMailSender = async (receiverEmail: string, subject: string, body: string): Promise<void> => {
-  const transporter: Mail = await nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    secure: false,
+  const transporter: Mail = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
     auth: {
-      user: config.SENDER_EMAIL!,
-      pass: config.SENDER_EMAIL_PASSWORDs
+      user: config.SENDER_EMAIL,
+      pass: config.SENDER_EMAIL_PASSWORD
     }
   });
   const mailOptions: IMailOptions = {
-    from: `Wandrooz ${config.SENDER_EMAIL!}`,
+    from: 'Wandroz',
     to: receiverEmail,
     subject,
     html: body

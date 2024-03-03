@@ -40,7 +40,7 @@ export const resetPassword = joiValidation(passwordSchema)(async (req: Request, 
   if (!existingUser) {
     throw new BadRequestError('Reset token has expired.');
   }
-
+  const user = await getUserByAuthId(existingUser._id.toString());
   existingUser.password = password;
   existingUser.passwordResetExpires = undefined;
   existingUser.passwordResetToken = undefined;
@@ -48,6 +48,8 @@ export const resetPassword = joiValidation(passwordSchema)(async (req: Request, 
 
   const templateParams: IResetPasswordParams = {
     email: existingUser.email!,
+    firstName: user.firstName,
+    lastName: user.lastName,
     ipaddress: publicIp.address(),
     date: moment().format('DD//MM//YYYY HH:mm')
   };

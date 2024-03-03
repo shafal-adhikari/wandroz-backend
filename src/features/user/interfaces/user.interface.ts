@@ -28,6 +28,8 @@ export interface IUserDocument extends Document {
 
 export interface IResetPasswordParams {
   email: string;
+  firstName: string;
+  lastName: string;
   ipaddress: string;
   date: string;
 }

@@ -8,7 +8,7 @@ Accept: application/json
 withCredentials: true
 
 ###
-PUT {{baseUrl}}/{{urlPath}}/notification/<notificationId>
+PUT {{baseUrl}}/{{urlPath}}/notification/65e35b5b78b73851a0619522
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
