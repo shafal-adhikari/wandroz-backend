@@ -13,7 +13,9 @@ export function uploads(
         public_id,
         overwrite,
         invalidate
+        // transformation: [{ crop: 'fill', aspect_ratio: '1:1' }]
       },
+
       (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
         if (error) {
           resolve(error);

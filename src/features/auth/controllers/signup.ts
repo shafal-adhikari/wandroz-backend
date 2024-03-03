@@ -3,22 +3,21 @@ import { joiValidation } from '@root/shared/globals/validations/joiValidations';
 import { signupSchema } from '../schemes/signup';
 import { Request, Response } from 'express';
 import { IAuthDocument, ISignUpData } from '@auth/interfaces/auth.interface';
-import { getAuthUserByUsernameOrEmail } from '@root/shared/services/db/auth.service';
+import { getAuthUserByEmail } from '@root/shared/services/db/auth.service';
 import { BadRequestError } from '@root/shared/globals/helpers/error-handler';
 import { UploadApiResponse } from 'cloudinary';
 import { uploads } from '@root/shared/globals/helpers/cloudinary-upload';
 import HTTP_STATUS from 'http-status-codes';
-import { IUserDocument } from '@user/interfaces/user.interface';
+import { AccountPrivacy, IUserDocument } from '@user/interfaces/user.interface';
 import { config } from '@root/config';
 import { saveUserToCache } from '@service/redis/user.cache';
-import { omit } from 'lodash';
 import { addAuthUserJob } from '@service/queues/auth.queue';
 import { addUserJob } from '@service/queues/user.queue';
 import JWT from 'jsonwebtoken';
 import { generateRandomIntegers } from '@global/helpers/helpers';
 export const signUp = joiValidation(signupSchema)(async (req: Request, res: Response) => {
-  const { username, email, password, avatarImage } = req.body;
-  const checkIfUserExist: IAuthDocument = await getAuthUserByUsernameOrEmail(username, email.toLowerCase());
+  const { firstName, lastName, email, password, avatarImage } = req.body;
+  const checkIfUserExist: IAuthDocument = await getAuthUserByEmail(email.toLowerCase());
   if (checkIfUserExist) {
     throw new BadRequestError('User already exists');
   }
@@ -28,11 +27,22 @@ export const signUp = joiValidation(signupSchema)(async (req: Request, res: Resp
   const authData: IAuthDocument = signUpData({
     _id: authObjectId,
     uId,
-    username,
+    firstName,
+    lastName,
     email,
     password
   });
-  const userDataToSave: IUserDocument = userData(authData, userObjectId);
+  const userDataToSave: IUserDocument = userData(
+    {
+      _id: authObjectId,
+      uId,
+      firstName,
+      lastName,
+      email,
+      password
+    },
+    userObjectId
+  );
 
   if (avatarImage) {
     const result = (await uploads(avatarImage, userObjectId.toString(), true, true)) as UploadApiResponse;
@@ -43,12 +53,14 @@ export const signUp = joiValidation(signupSchema)(async (req: Request, res: Resp
     userDataToSave.profilePicture = `https://res.cloudinary.com/${config.CLOUD_NAME}/image/upload/v${result.version}/${userObjectId}`;
   }
   await saveUserToCache(`${userObjectId}`, uId, userDataToSave);
-  omit(userDataToSave, ['uId', 'username', 'email', 'password']);
+
   addAuthUserJob('addAuthUserToDB', { value: authData });
-  addUserJob('addAuthUserToDB', { value: userDataToSave });
+  addUserJob('addUserToDB', { value: userDataToSave });
   const jwtToken = generateSignUpToken(authData, userObjectId);
   req.session = { jwt: jwtToken };
-  res.status(HTTP_STATUS.CREATED).json({ message: 'User Created Successfully', user: userDataToSave, token: jwtToken });
+  res
+    .status(HTTP_STATUS.CREATED)
+    .json({ message: 'User Created Successfully', user: { ...authData, password: undefined }, token: jwtToken });
 });
 
 const generateSignUpToken = (data: IAuthDocument, userObjectId: ObjectId): string => {
@@ -56,8 +68,7 @@ const generateSignUpToken = (data: IAuthDocument, userObjectId: ObjectId): strin
     {
       userId: userObjectId,
       uId: data.uId,
-      email: data.email,
-      username: data.username
+      email: data.email
     },
     config.JWT_TOKEN,
     {
@@ -66,25 +77,25 @@ const generateSignUpToken = (data: IAuthDocument, userObjectId: ObjectId): strin
   );
 };
 const signUpData = (data: ISignUpData): IAuthDocument => {
-  const { _id, username, email, uId, password } = data;
+  const { _id, email, uId, password } = data;
   return {
     _id,
     uId,
-    username,
     email: email.toLowerCase(),
     password,
     createdAt: new Date()
   } as IAuthDocument;
 };
 
-const userData = (data: IAuthDocument, userObjectId: ObjectId): IUserDocument => {
-  const { _id, username, password, email, uId } = data;
+const userData = (data: ISignUpData, userObjectId: ObjectId): IUserDocument => {
+  const { _id, firstName, lastName, email, uId } = data;
   return {
     _id: userObjectId.toString(),
     authId: _id.toString(),
-    username,
-    password,
+    firstName,
+    lastName,
     email,
+    privacy: AccountPrivacy.PRIVATE,
     uId,
     profilePicture: '',
     blocked: [],

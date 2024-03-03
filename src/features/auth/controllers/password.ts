@@ -3,7 +3,7 @@ import { emailSchema, passwordSchema } from '@auth/schemes/password';
 import { BadRequestError } from '@global/helpers/error-handler';
 import { config } from '@root/config';
 import { joiValidation } from '@root/shared/globals/validations/joiValidations';
-import { getAuthUserByPasswordToken, getAuthUserByUsernameOrEmail, updatePasswordToken } from '@service/db/auth.service';
+import { getAuthUserByEmail, getAuthUserByPasswordToken, updatePasswordToken } from '@service/db/auth.service';
 import { passwordResetTemplate } from '@service/emails/templates/forgot-password/forgot-password-template';
 import { addEmailJob } from '@service/queues/email.queue';
 import { Request, Response } from 'express';
@@ -13,18 +13,20 @@ import publicIp from 'ip';
 import moment from 'moment';
 import crypto from 'crypto';
 import { passwordResetConfirmationTemplate } from '@service/emails/templates/reset-password/reset-password-template';
+import { getUserByAuthId } from '@service/db/user.service';
 
 export const createResetPasswordToken = joiValidation(emailSchema)(async (req: Request, res: Response) => {
   const { email } = req.body;
-  const existingUser = await getAuthUserByUsernameOrEmail(email, email);
-  if (!existingUser) {
+  const existingAuthUser = await getAuthUserByEmail(email);
+  if (!existingAuthUser) {
     throw new BadRequestError('Invalid credentials');
   }
+  const user = await getUserByAuthId(existingAuthUser._id as string);
   const randomToken = crypto.randomUUID();
-  await updatePasswordToken(`${existingUser._id}`, randomToken, Date.now() * 60 * 60 * 1000);
+  await updatePasswordToken(`${existingAuthUser._id}`, randomToken, Date.now() * 60 * 60 * 1000);
   const resetLink = `${config.CLIENT_URL}/reset-password?token=${randomToken}`;
-  const template = passwordResetTemplate(existingUser.username, resetLink);
-  addEmailJob('forgotPasswordEmail', { template, receiverEmail: existingUser.email, subject: 'Reset your password' });
+  const template = passwordResetTemplate(`${user.firstName} ${user.lastName}`, resetLink);
+  addEmailJob('forgotPasswordEmail', { template, receiverEmail: existingAuthUser.email, subject: 'Reset your password' });
   res.status(HTTP_STATUS.OK).json({ message: 'Password reset email sent.' });
 });
 
@@ -38,15 +40,16 @@ export const resetPassword = joiValidation(passwordSchema)(async (req: Request, 
   if (!existingUser) {
     throw new BadRequestError('Reset token has expired.');
   }
-
+  const user = await getUserByAuthId(existingUser._id.toString());
   existingUser.password = password;
   existingUser.passwordResetExpires = undefined;
   existingUser.passwordResetToken = undefined;
   await existingUser.save();
 
   const templateParams: IResetPasswordParams = {
-    username: existingUser.username!,
     email: existingUser.email!,
+    firstName: user.firstName,
+    lastName: user.lastName,
     ipaddress: publicIp.address(),
     date: moment().format('DD//MM//YYYY HH:mm')
   };

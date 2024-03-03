@@ -1,9 +1,12 @@
-import { IUserDocument } from '@user/interfaces/user.interface';
+import { AccountPrivacy, IUserDocument } from '@user/interfaces/user.interface';
 import mongoose, { model, Model, Schema } from 'mongoose';
 
 const userSchema: Schema = new Schema({
   authId: { type: mongoose.Schema.Types.ObjectId, ref: 'Auth', index: true },
+  firstName: { type: String },
+  lastName: { type: String },
   profilePicture: { type: String, default: '' },
+  privacy: { type: String, enum: Object.keys(AccountPrivacy), default: AccountPrivacy.PUBLIC },
   postsCount: { type: Number, default: 0 },
   followersCount: { type: Number, default: 0 },
   followingCount: { type: Number, default: 0 },

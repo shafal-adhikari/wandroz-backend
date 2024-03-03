@@ -1,4 +1,4 @@
-import { Queue } from 'bullmq';
+import { Queue, QueueEvents } from 'bullmq';
 import { createBullBoard } from '@bull-board/api';
 import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
@@ -7,9 +7,11 @@ import { IEmailJob, IUserJob, IUserJobInfo } from '@user/interfaces/user.interfa
 import { redisClient } from '@service/redis/redisClient';
 import { IPostJobData } from '@post/interfaces/post.interface';
 import { IFileImageJobData } from '@image/interfaces/image.interface';
+import { ICommentJob } from '@root/features/comments/interfaces/comment.interface';
+import { IReactionJob } from '@reactions/interfaces/reaction.interface';
 
 let bullAdapters: BullMQAdapter[] = [];
-type IBaseJobData = IAuthJob | IUserJob | IEmailJob | IUserJobInfo | IPostJobData | IFileImageJobData;
+type IBaseJobData = IAuthJob | IUserJob | IEmailJob | IUserJobInfo | IPostJobData | IFileImageJobData | ICommentJob | IReactionJob;
 export let serverAdapter: ExpressAdapter;
 export const createQueue = (queueName: string) => {
   const queue = new Queue(queueName, {
@@ -22,6 +24,12 @@ export const createQueue = (queueName: string) => {
       }
     },
     connection: redisClient
+  });
+  const queueEvents = new QueueEvents(queueName, {
+    connection: redisClient
+  });
+  queueEvents.on('failed', ({ jobId, failedReason }) => {
+    console.log(`${jobId} failed with reason ${failedReason}`);
   });
   bullAdapters.push(new BullMQAdapter(queue));
   bullAdapters = [...new Set(bullAdapters)];

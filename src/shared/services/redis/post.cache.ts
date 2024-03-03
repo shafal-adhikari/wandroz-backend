@@ -3,7 +3,8 @@ import { redisClient } from './redisClient';
 import { ServerError } from '@global/helpers/error-handler';
 import { parseJson } from '@global/helpers/helpers';
 import { IReactions } from '@reactions/interfaces/reaction.interface';
-import { IUserDocument } from '@user/interfaces/user.interface';
+import { getUserFromCache } from './user.cache';
+import { getReactionsFromCache } from './reaction.cache';
 
 export const savePostToCache = async (data: ISavePostToCache): Promise<void> => {
   const createdAt = new Date();
@@ -36,7 +37,6 @@ export const getPostsFromCache = async (key: string, start: number, end: number)
     const reply: string[] = await redisClient.zrevrange(key, start, end);
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
     for (const value of reply) {
-      console.log('this running: ', value);
       multi.hgetall(`posts:${value}`);
     }
     const replies = (await multi.exec()) as [Error | null, IPostDocument][];
@@ -46,17 +46,20 @@ export const getPostsFromCache = async (key: string, start: number, end: number)
       if (error) {
         throw error;
       }
-      const user = (await redisClient.hgetall(`users:${post.userId}`)) as unknown as IUserDocument;
-      post.username = user.username;
-      post.profilePicture = user.profilePicture;
+      const postReactions = await getReactionsFromCache(post._id as string);
+      const user = await getUserFromCache(post.userId);
       post.commentsCount = parseJson(`${post.commentsCount}`) as number;
       post.reactions = parseJson(`${post.reactions}`) as IReactions;
       post.images = parseJson(`${post.images}`) as { imgId: string; imgVersion: string }[];
+      post.profilePicture = user?.profilePicture;
+      post.firstName = user?.firstName;
+      post.lastName = user?.lastName;
+      post.allReactions = postReactions[0];
+      post.reactionCount = postReactions[1] ?? 0;
       post.videos = parseJson(`${post.videos}`) as { imgId: string; imgVersion: string }[];
       post.createdAt = new Date(parseJson(`${post.createdAt}`)) as Date;
       postReplies.push(post);
     }
-
     return postReplies;
   } catch (error) {
     throw new ServerError();
@@ -86,7 +89,7 @@ export const getPostsWithImagesFromCache = async (key: string, start: number, en
       if (error) {
         throw new ServerError();
       }
-      if ((post.images && parseJson(`${post.images}`).length) || post.gifUrl) {
+      if (post.images && parseJson(`${post.images}`).length) {
         post.commentsCount = parseJson(`${post.commentsCount}`) as number;
         post.reactions = parseJson(`${post.reactions}`) as IReactions;
         post.createdAt = new Date(parseJson(`${post.createdAt}`)) as Date;
@@ -128,7 +131,7 @@ export const getPostsWithVideosFromCache = async (key: string, start: number, en
 
 export const getUserPostsFromCache = async (key: string, uId: number): Promise<IPostDocument[]> => {
   try {
-    const reply: string[] = await redisClient.zrangebyscore(key, uId, uId);
+    const reply: string[] = await redisClient.zrevrangebyscore(key, uId, uId);
     const multi: ReturnType<typeof redisClient.multi> = redisClient.multi();
     for (const value of reply) {
       multi.hgetall(`posts:${value}`);
@@ -140,13 +143,23 @@ export const getUserPostsFromCache = async (key: string, uId: number): Promise<I
       if (error) {
         throw new ServerError();
       }
+      const user = await getUserFromCache(post.userId);
+      const postReactions = await getReactionsFromCache(post._id as string);
+      post.allReactions = postReactions[0];
+      post.reactionCount = postReactions[1] ?? 0;
       post.commentsCount = parseJson(`${post.commentsCount}`) as number;
       post.reactions = parseJson(`${post.reactions}`) as IReactions;
       post.createdAt = new Date(parseJson(`${post.createdAt}`)) as Date;
+      post.images = parseJson(`${post.images}`);
+      post.videos = parseJson(`${post.videos}`);
+      post.profilePicture = user?.profilePicture;
+      post.firstName = user?.firstName;
+      post.lastName = user?.lastName;
       postReplies.push(post);
     }
     return postReplies;
   } catch (error) {
+    console.log(error);
     throw new ServerError();
   }
 };

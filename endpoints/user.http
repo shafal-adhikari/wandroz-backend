@@ -8,25 +8,31 @@ Accept: application/json
 withCredentials: true
 
 ###
-GET {{baseUrl}}/{{urlPath}}/user/profile/<userId>
+GET {{baseUrl}}/{{urlPath}}/user/posts/65d9e57edeee49335008b880
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
 
 ###
-GET {{baseUrl}}/{{urlPath}}/user/profile/posts/<username>/<userId>/<uId>
+GET {{baseUrl}}/{{urlPath}}/user/profile/65d9e57edeee49335008b880
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
 
 ###
-GET {{baseUrl}}/{{urlPath}}/user/profile/user/suggestions
+GET {{baseUrl}}/{{urlPath}}/user/profile/posts/<userId>/<uId>
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
 
 ###
-GET {{baseUrl}}/{{urlPath}}/user/profile/search/sadfafas
+GET {{baseUrl}}/{{urlPath}}/user/user-suggestions
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+GET {{baseUrl}}/{{urlPath}}/user/search/shaf
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
@@ -78,6 +84,6 @@ withCredentials: true
 {
   "messages": true,
   "reactions": true,
-  "comments": false,
+  "comments": true,
   "follows": true
 }

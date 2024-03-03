@@ -20,13 +20,42 @@ export const getPosts = async (query: IGetPostsQuery, skip = 0, limit = 0, sort:
   } else {
     postQuery = query;
   }
-  const posts: IPostDocument[] = await PostModel.aggregate([{ $match: postQuery }, { $sort: sort }, { $skip: skip }, { $limit: limit }]);
+  const posts: IPostDocument[] = await PostModel.aggregate([
+    { $match: postQuery },
+    {
+      $lookup: {
+        from: 'User',
+        foreignField: '_id',
+        localField: 'userId',
+        as: 'user'
+      }
+    },
+    {
+      $lookup: {
+        from: 'Reaction',
+        foreignField: 'postId',
+        localField: '_id',
+        as: 'allReactions'
+      }
+    },
+    {
+      $unwind: '$user'
+    },
+    {
+      $addFields: {
+        firstName: '$user.firstName',
+        lastName: '$user.lastName',
+        profilePicture: '$user.profilePicture'
+      }
+    },
+    {
+      $unset: ['user']
+    },
+    { $sort: sort },
+    { $skip: skip },
+    { $limit: limit }
+  ]);
   return posts;
-};
-
-export const getPostsCount = async (): Promise<number> => {
-  const count: number = await PostModel.find({}).countDocuments();
-  return count;
 };
 
 export const deletePost = async (postId: string, userId: string): Promise<void> => {
@@ -46,4 +75,8 @@ export const deletePost = async (postId: string, userId: string): Promise<void> 
 export const editPost = async (postId: string, updatedPost: IPostDocument): Promise<void> => {
   const updatePost: UpdateQuery<IPostDocument> = PostModel.updateOne({ _id: postId }, { $set: updatedPost });
   await Promise.all([updatePost]);
+};
+export const getPostsCount = async (): Promise<number> => {
+  const count: number = await PostModel.find({}).countDocuments();
+  return count;
 };

@@ -1,4 +1,4 @@
-import { IReactions } from '@reactions/interfaces/reaction.interface';
+import { IReactionDocument, IReactions } from '@reactions/interfaces/reaction.interface';
 import { ObjectId } from 'mongodb';
 import mongoose, { Document } from 'mongoose';
 
@@ -7,20 +7,25 @@ export interface IPostImages {
   imgId: string;
 }
 export interface IPostDocument extends Document {
-  _id?: string | mongoose.Types.ObjectId;
+  _id: string | mongoose.Types.ObjectId;
   userId: string;
   post: string;
-  bgColor: string;
   commentsCount: number;
-  username?: string;
   profilePicture?: string;
+  firstName?: string;
+  lastName?: string;
   images?: IPostImages[];
   videos?: IPostImages[];
+  imageLinks: string[];
+  videoLinks: string[];
   videoId?: string;
   videoVersion?: string;
   feelings?: string;
   gifUrl?: string;
   privacy?: string;
+  reactionCount?: number;
+  userReaction?: string;
+  allReactions?: IReactionDocument[];
   reactions?: IReactions;
   createdAt?: Date;
 }
@@ -29,6 +34,7 @@ export interface IGetPostsQuery {
   _id?: ObjectId | string;
   images?: string;
   gifUrl?: string;
+  userId?: string;
   videos?: string;
 }
 

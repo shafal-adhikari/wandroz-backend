@@ -6,6 +6,7 @@ import { IBgUploadResponse } from '@image/interfaces/image.interface';
 import { addImageSchema } from '@image/schemes/image.schema';
 import { config } from '@root/config';
 import { addImageJob } from '@service/queues/image.queue';
+import { addUserJob } from '@service/queues/user.queue';
 import { updateSingleUserItemInCache } from '@service/redis/user.cache';
 import { IUserDocument } from '@user/interfaces/user.interface';
 import { UploadApiResponse } from 'cloudinary';
@@ -19,12 +20,7 @@ export const addProfileImage = joiValidation(addImageSchema)(async (req: Request
   }
   const url = `https://res.cloudinary.com/${config.CLOUD_NAME}/image/upload/v${result.version}/${result.public_id}`;
   await updateSingleUserItemInCache(`${req.currentUser!.userId}`, 'profilePicture', url);
-  addImageJob('addUserProfileImageToDB', {
-    key: `${req.currentUser!.userId}`,
-    value: url,
-    imgId: result.public_id,
-    imgVersion: result.version.toString()
-  });
+  addUserJob('updateUserProfile', { key: `${req.currentUser!.userId}`, value: { profilePicture: url } });
   res.status(HTTP_STATUS.OK).json({ message: 'Image added successfully' });
 });
 

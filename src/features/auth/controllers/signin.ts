@@ -3,15 +3,15 @@ import { loginSchema } from '@auth/schemes/signin';
 import { BadRequestError } from '@global/helpers/error-handler';
 import { joiValidation } from '@global/validations/joiValidations';
 import { config } from '@root/config';
-import { getAuthUserByUsername } from '@service/db/auth.service';
+import { getAuthUserByEmail } from '@service/db/auth.service';
 import { Request, Response } from 'express';
 import JWT from 'jsonwebtoken';
 import { getUserByAuthId } from '@service/db/user.service';
 import { IUserDocument } from '@user/interfaces/user.interface';
 
 export const signIn = joiValidation(loginSchema)(async (req: Request, res: Response) => {
-  const { username, password } = req.body;
-  const existingUser = await getAuthUserByUsername(username);
+  const { email, password } = req.body;
+  const existingUser = await getAuthUserByEmail(email);
   if (!existingUser) {
     throw new BadRequestError('Invalid Credentials');
   }
@@ -24,14 +24,12 @@ export const signIn = joiValidation(loginSchema)(async (req: Request, res: Respo
     {
       userId: user._id,
       uId: existingUser.uId,
-      email: existingUser.email,
-      username: existingUser.username
+      email: existingUser.email
     },
     config.JWT_TOKEN
   );
   const userDocument = {
     ...user,
-    username: existingUser.username,
     email: existingUser.email,
     authId: existingUser._id,
     uId: existingUser.uId,

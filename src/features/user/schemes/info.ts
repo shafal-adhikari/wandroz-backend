@@ -1,6 +1,8 @@
 import Joi, { ObjectSchema } from 'joi';
 
 const basicInfoSchema: ObjectSchema = Joi.object().keys({
+  firstName: Joi.string().optional().allow(null, ''),
+  lastName: Joi.string().required().allow(null, ''),
   quote: Joi.string().optional().allow(null, ''),
   work: Joi.string().optional().allow(null, ''),
   school: Joi.string().optional().allow(null, ''),

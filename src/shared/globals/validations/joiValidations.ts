@@ -7,7 +7,7 @@ export const joiValidation = (schema: ObjectSchema) => {
   return function (handler: (...args: any[]) => Promise<any>) {
     return async function (...args: any[]) {
       const req: Request = args[0];
-      const { error } = await Promise.resolve(schema.validate(req.body));
+      const { error } = await Promise.resolve(schema.unknown().validate(req.body));
       if (error?.details) {
         throw new JoiRequestValidationError(error.details[0].message);
       }
