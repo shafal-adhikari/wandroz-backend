@@ -25,5 +25,5 @@ export const addComment = joiValidation(addCommentSchema)(async (req: Request, r
     comment: commentData
   };
   addCommentJob('addCommentToDB', databaseCommentData);
-  res.status(HTTP_STATUS.OK).json({ message: 'Comment created successfully' });
+  res.status(HTTP_STATUS.OK).json({ message: 'Comment created successfully', comment: commentData });
 });

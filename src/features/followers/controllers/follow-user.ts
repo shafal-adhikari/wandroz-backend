@@ -15,7 +15,8 @@ export const followUser = async (req: Request, res: Response): Promise<void> => 
     addFollowerJob('addFollowerToDB', {
       keyOne: `${req.currentUser!.userId}`,
       keyTwo: `${followeeId}`,
-      username: `${user.firstName} ${user.lastName}`,
+      firstName: `${user.firstName}`,
+      lastName: `${user.lastName}`,
       followerDocumentId: followerObjectId,
       status: FollowerStatus.PENDING
     });
@@ -33,7 +34,8 @@ export const followUser = async (req: Request, res: Response): Promise<void> => 
   addFollowerJob('addFollowerToDB', {
     keyOne: `${req.currentUser!.userId}`,
     keyTwo: `${followeeId}`,
-    username: `${user.firstName} ${user.lastName}`,
+    firstName: `${user.firstName}`,
+    lastName: `${user.lastName}`,
     followerDocumentId: followerObjectId,
     status: FollowerStatus.COMPLETE
   });

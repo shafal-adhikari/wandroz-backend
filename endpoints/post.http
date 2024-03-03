@@ -47,13 +47,13 @@ withCredentials: true
 }
 
 ###
-PUT {{baseUrl}}/{{urlPath}}/post/<postId>
+PUT {{baseUrl}}/{{urlPath}}/post/65e4475625ee51d75cccfae6
 Content-Type: application/json
 Accept: application/json
 withCredentials: true,
 
 {
-  "post": "",
+  "post": "Hello test this images please",
   "bgColor": "",
   "privacy": "",
   "gifUrl": "",

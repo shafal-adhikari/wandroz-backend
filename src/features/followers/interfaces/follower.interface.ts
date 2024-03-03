@@ -35,7 +35,8 @@ export interface IFollowerData {
 export interface IFollowerJobData {
   keyOne?: string;
   keyTwo?: string;
-  username?: string;
+  firstName?: string;
+  lastName?: string;
   followerDocumentId?: ObjectId;
   status?: FollowerStatus;
   acceptStatus?: boolean;

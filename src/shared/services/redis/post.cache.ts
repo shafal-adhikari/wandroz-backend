@@ -32,6 +32,23 @@ export const savePostToCache = async (data: ISavePostToCache): Promise<void> => 
   }
 };
 
+export const getPostFromCache = async (postId: string) => {
+  const post = (await redisClient.hgetall(`posts:${postId}`)) as unknown as IPostDocument;
+  const postReactions = await getReactionsFromCache(post._id as string);
+  const user = await getUserFromCache(post.userId);
+  post.commentsCount = parseJson(`${post.commentsCount}`) as number;
+  post.reactions = parseJson(`${post.reactions}`) as IReactions;
+  post.images = parseJson(`${post.images}`) as { imgId: string; imgVersion: string }[];
+  post.profilePicture = user?.profilePicture;
+  post.firstName = user?.firstName;
+  post.lastName = user?.lastName;
+  post.allReactions = postReactions[0];
+  post.reactionCount = postReactions[1] ?? 0;
+  post.videos = parseJson(`${post.videos}`) as { imgId: string; imgVersion: string }[];
+  post.createdAt = new Date(parseJson(`${post.createdAt}`)) as Date;
+  return post;
+};
+
 export const getPostsFromCache = async (key: string, start: number, end: number): Promise<IPostDocument[]> => {
   try {
     const reply: string[] = await redisClient.zrevrange(key, start, end);

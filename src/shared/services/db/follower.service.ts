@@ -15,7 +15,8 @@ import { notificationMessageTemplate } from '@service/emails/templates/notificat
 export const addFollowerToDB = async (
   userId: string,
   followeeId: string,
-  username: string,
+  firstName: string,
+  lastName: string,
   followerDocumentId: ObjectId,
   status: FollowerStatus
 ): Promise<void> => {
@@ -54,7 +55,10 @@ export const addFollowerToDB = async (
     await notificationModel.insertNotification({
       userFrom: userId,
       userTo: followeeId,
-      message: status == FollowerStatus.COMPLETE ? `${username} is now following you.` : `${username} sent a follow request`,
+      message:
+        status == FollowerStatus.COMPLETE
+          ? `${firstName} ${lastName} is now following you.`
+          : `${firstName} ${lastName} sent a follow request`,
       notificationType: 'follows',
       entityId: new mongoose.Types.ObjectId(userId),
       createdItemId: new mongoose.Types.ObjectId(following._id),
@@ -64,14 +68,19 @@ export const addFollowerToDB = async (
       reaction: ''
     });
     const templateParams: INotificationTemplate = {
-      message: `${username} is now following you.`,
-      header: 'Follower Notification'
+      message: `${firstName} ${lastName} is now following you.`,
+      header: 'Follower Notification',
+      firstName: `${firstName}`,
+      lastName: `${lastName}`
     };
     const template: string = notificationMessageTemplate(templateParams);
     addEmailJob('followersEmail', {
       receiverEmail: response[1].email!,
       template,
-      subject: status == FollowerStatus.COMPLETE ? `${username} is now following you.` : `${username} has sent a follow request`
+      subject:
+        status == FollowerStatus.COMPLETE
+          ? `${firstName} ${lastName} is now following you.`
+          : `${firstName} ${lastName} has sent a follow request`
     });
   }
 };
@@ -115,7 +124,9 @@ export const updateFollowerStatusToDB = async (followerId: string, followeeId: s
       });
       const templateParams: INotificationTemplate = {
         message: `${response[1].firstName} ${response[1].lastName} accepted your follow request`,
-        header: 'Follower Notification'
+        header: 'Follower Notification',
+        firstName: `${response[1].firstName}`,
+        lastName: `${response[1].lastName}`
       };
       const template: string = notificationMessageTemplate(templateParams);
       addEmailJob('followersEmail', {

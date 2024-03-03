@@ -112,6 +112,7 @@ export const profileByUserId: (req: Request, res: Response) => Promise<void> = a
       postsCount: user.postsCount,
       firstName: user.firstName,
       lastName: user.lastName,
+      privacy: user.privacy,
       profilePicture: user.profilePicture
     };
   }

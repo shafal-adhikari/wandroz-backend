@@ -36,4 +36,6 @@ export interface INotificationJobData {
 export interface INotificationTemplate {
   message: string;
   header: string;
+  firstName: string;
+  lastName: string;
 }

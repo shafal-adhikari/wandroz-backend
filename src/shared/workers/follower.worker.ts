@@ -6,10 +6,10 @@ export const instantiatieFollowerWorker = (queueName: string) => {
   new Worker(
     queueName,
     async (job: Job) => {
-      const { keyOne, keyTwo, username, followerDocumentId, status, acceptStatus } = job.data as IFollowerJobData;
+      const { keyOne, keyTwo, firstName, lastName, followerDocumentId, status, acceptStatus } = job.data as IFollowerJobData;
       switch (job.name) {
         case 'addFollowerToDB':
-          await followerService.addFollowerToDB(keyOne!, keyTwo!, username!, followerDocumentId!, status!);
+          await followerService.addFollowerToDB(keyOne!, keyTwo!, firstName!, lastName!, followerDocumentId!, status!);
           break;
         case 'updateFollowerStatus':
           await followerService.updateFollowerStatusToDB(keyOne!, keyTwo!, acceptStatus!);

@@ -3,7 +3,7 @@ import { IGetPostsQuery, IPostDocument, IQueryComplete, IQueryDeleted } from '@p
 import { PostModel } from '@post/models/post.schema';
 import { IUserDocument } from '@user/interfaces/user.interface';
 import { UserModel } from '@user/models/user.schema';
-import { Query, UpdateQuery } from 'mongoose';
+import mongoose, { Query, UpdateQuery } from 'mongoose';
 
 export const addPostToDb = async (userId: string, createdPost: IPostDocument): Promise<void> => {
   const post: Promise<IPostDocument> = PostModel.create(createdPost);
@@ -57,7 +57,45 @@ export const getPosts = async (query: IGetPostsQuery, skip = 0, limit = 0, sort:
   ]);
   return posts;
 };
-
+export const getPost = async (postId: string) => {
+  const posts = await PostModel.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(postId)
+      }
+    },
+    {
+      $lookup: {
+        from: 'User',
+        foreignField: '_id',
+        localField: 'userId',
+        as: 'user'
+      }
+    },
+    {
+      $lookup: {
+        from: 'Reaction',
+        foreignField: 'postId',
+        localField: '_id',
+        as: 'allReactions'
+      }
+    },
+    {
+      $unwind: '$user'
+    },
+    {
+      $addFields: {
+        firstName: '$user.firstName',
+        lastName: '$user.lastName',
+        profilePicture: '$user.profilePicture'
+      }
+    },
+    {
+      $unset: ['user']
+    }
+  ]);
+  return posts[0] as IPostDocument;
+};
 export const deletePost = async (postId: string, userId: string): Promise<void> => {
   const post = await PostModel.findById(postId);
   if (post?.images?.length) {
