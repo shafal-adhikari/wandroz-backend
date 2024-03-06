@@ -110,10 +110,10 @@ const userData = (data: ISignUpData, userObjectId: ObjectId): IUserDocument => {
     followingCount: 0,
     postsCount: 0,
     notifications: {
-      messages: false,
-      reactions: false,
-      comments: false,
-      follows: false
+      messages: true,
+      reactions: true,
+      comments: true,
+      follows: true
     },
     social: {
       facebook: '',

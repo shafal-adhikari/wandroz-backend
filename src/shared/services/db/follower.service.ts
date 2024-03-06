@@ -67,21 +67,21 @@ export const addFollowerToDB = async (
       post: '',
       reaction: ''
     });
-    const templateParams: INotificationTemplate = {
-      message: `${firstName} ${lastName} is now following you.`,
-      header: 'Follower Notification',
-      firstName: `${firstName}`,
-      lastName: `${lastName}`
-    };
-    const template: string = notificationMessageTemplate(templateParams);
-    addEmailJob('followersEmail', {
-      receiverEmail: response[1].email!,
-      template,
-      subject:
-        status == FollowerStatus.COMPLETE
-          ? `${firstName} ${lastName} is now following you.`
-          : `${firstName} ${lastName} has sent a follow request`
-    });
+    // const templateParams: INotificationTemplate = {
+    //   message: `${firstName} ${lastName} is now following you.`,
+    //   header: 'Follower Notification',
+    //   firstName: `${firstName}`,
+    //   lastName: `${lastName}`
+    // };
+    // const template: string = notificationMessageTemplate(templateParams);
+    // addEmailJob('followersEmail', {
+    //   receiverEmail: response[1].email!,
+    //   template,
+    //   subject:
+    //     status == FollowerStatus.COMPLETE
+    //       ? `${firstName} ${lastName} is now following you.`
+    //       : `${firstName} ${lastName} has sent a follow request`
+    // });
   }
 };
 export const updateFollowerStatusToDB = async (followerId: string, followeeId: string, status: boolean): Promise<void> => {
