@@ -74,3 +74,4 @@ const io = new Server(httpServer, {
   }
 });
 io.adapter(createAdapter(redisClient, redisClient.duplicate()));
+export { io as socketIo };

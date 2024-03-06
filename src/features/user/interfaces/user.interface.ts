@@ -64,11 +64,6 @@ export interface ISearchUser {
   email: string;
 }
 
-export interface ISocketData {
-  blockedUser: string;
-  blockedBy: string;
-}
-
 export interface ILogin {
   userId: string;
 }

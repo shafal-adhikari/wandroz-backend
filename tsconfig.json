@@ -27,6 +27,7 @@
       "@notification/*": ["src/features/notifications/*"],
       "@comment/*": ["src/features/comments/*"],
       "@image/*": ["src/features/image/*"],
+      "@chat/*": ["src/features/chat/*"],
       "@post/*": ["src/features/post/*"],
       "@reactions/*": ["src/features/reactions/*"],
       "@global/*": ["src/shared/globals/*"],
