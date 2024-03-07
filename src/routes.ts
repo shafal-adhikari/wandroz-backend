@@ -10,6 +10,7 @@ import { followerRoutes } from '@follower/routes/followerRoutes';
 import { commentRoutes } from '@comment/routes/commentRoutes';
 import { reactionRoutes } from '@reactions/routes/reactionRoutes';
 import { notificationRoutes } from '@notification/routes/notificationRoutes';
+import { chatRoutes } from '@chat/routes/chatRoutes';
 
 const BASE_PATH = '/api/v1';
 export default (app: Application) => {
@@ -23,4 +24,5 @@ export default (app: Application) => {
   app.use(BASE_PATH, verifyUser, commentRoutes);
   app.use(BASE_PATH, verifyUser, reactionRoutes);
   app.use(BASE_PATH, verifyUser, notificationRoutes);
+  app.use(BASE_PATH, verifyUser, chatRoutes);
 };

@@ -7,7 +7,7 @@ export async function getMessages(req: Request, res: Response): Promise<void> {
   const { userId } = req.params;
   const userObjectId = new mongoose.Types.ObjectId(userId);
   const senderObjectId = new mongoose.Types.ObjectId(req.currentUser!.userId);
-  await getChatMessages(userObjectId, senderObjectId);
+  const messages = await getChatMessages(userObjectId, senderObjectId);
 
-  res.status(HTTP_STATUS.OK).json({ message: 'Message added' });
+  res.status(HTTP_STATUS.OK).json({ message: 'messages', messages });
 }

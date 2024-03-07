@@ -26,7 +26,7 @@ export const getChatMessages = async (senderId: mongoose.Types.ObjectId, receive
         $match: {
           $or: [
             { senderId: senderId, receiverId: receiverId },
-            { senderId: senderId, receiverId: receiverId }
+            { senderId: receiverId, receiverId: senderId }
           ]
         }
       },
