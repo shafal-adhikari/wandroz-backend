@@ -13,7 +13,10 @@ const authSchema: Schema = new Schema(
     password: { type: String },
     createdAt: { type: Date, default: Date.now },
     passwordResetToken: { type: String, default: '' },
-    passwordResetExpires: { type: Number }
+    passwordResetExpires: { type: Number },
+    verifyToken: { type: String, default: '' },
+    verifyTokenExpires: { type: Number },
+    isVerified: { type: Boolean, default: false }
   },
   {
     toJSON: {

@@ -8,6 +8,8 @@ import { Request, Response } from 'express';
 import JWT from 'jsonwebtoken';
 import { getUserByAuthId } from '@service/db/user.service';
 import { IUserDocument } from '@user/interfaces/user.interface';
+import { addEmailJob } from '@service/queues/email.queue';
+import { loginTemplate } from '@service/emails/templates/login/login-template';
 
 export const signIn = joiValidation(loginSchema)(async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -17,6 +19,11 @@ export const signIn = joiValidation(loginSchema)(async (req: Request, res: Respo
   }
   const passwordCheck = await existingUser.comparePassword(password);
   if (!passwordCheck) {
+    addEmailJob('login-attempt', {
+      receiverEmail: existingUser.email,
+      subject: 'Login Attempt Made',
+      template: loginTemplate(`${existingUser.email}`, req.ip!, Date.now().toLocaleString())
+    });
     throw new BadRequestError('Invalid Credentials');
   }
   const user = await getUserByAuthId(existingUser._id.toString());

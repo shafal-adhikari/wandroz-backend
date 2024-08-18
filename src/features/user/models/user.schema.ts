@@ -26,6 +26,7 @@ const userSchema: Schema = new Schema({
     twitter: { type: String, default: '' },
     youtube: { type: String, default: '' }
   },
+  isVerified: { type: Boolean },
   work: { type: String, default: '' },
   school: { type: String, default: '' },
   location: { type: String, default: '' },

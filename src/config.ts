@@ -15,7 +15,7 @@ export const config = {
   CLOUD_API_KEY: process.env.CLOUD_API_KEY,
   CLOUD_API_SECRET: process.env.CLOUD_API_SECRET,
   SENDER_EMAIL: process.env.SENDER_EMAIL || 'haskell.purdy89@ethereal.email',
-  SENDER_EMAIL_PASSWORD: process.env.SENDER_EMAIL_PASSWORD || 'f8aVyed7usAAf1hgET',
+  SENDER_EMAIL_PASSWORD: process.env.SENDER_EMAIL_PASSWORD || 'blby xajm dbkd aggl',
   SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
   SENDGRID_SENDER: process.env.SENDGRID_SENDER
 };

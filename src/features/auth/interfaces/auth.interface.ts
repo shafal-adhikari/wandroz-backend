@@ -23,6 +23,9 @@ export interface IAuthDocument extends Document {
   email: string;
   password?: string;
   createdAt: Date;
+  verifyToken?: string;
+  verifyTokenExpires?: number;
+  isVerified: boolean;
   passwordResetToken?: string;
   passwordResetExpires?: number | string;
   comparePassword(password: string): Promise<boolean>;
@@ -36,6 +39,8 @@ export interface ISignUpData {
   lastName: string;
   email: string;
   password: string;
+  verifyToken?: string;
+  verifyTokenExpires?: number;
 }
 
 export interface IAuthJob {

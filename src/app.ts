@@ -14,8 +14,9 @@ import databseConnection from './setupDatabase';
 import { CustomError, IErrorResponse, NotFoundError } from './shared/globals/helpers/error-handler';
 import { redisClient } from '@service/redis/redisClient';
 import { handleSocketIoConnection } from '@socket/socket';
+import rateLimit from 'express-rate-limit';
 const app = express();
-
+app.set('trust proxy', true);
 app.use(
   cookieSession({
     name: 'session',
@@ -25,7 +26,21 @@ app.use(
   })
 );
 
+const customLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 10,
+  handler: (req, res) => {
+    res.status(429).json({
+      error: 'You have exceeded the request limit! Please try again later.'
+    });
+  }
+});
+app.use(customLimiter);
+
+// To protect against HTTP Parameter Pollution
 app.use(hpp());
+
+//Safe and Secure headers to prevent against clickjacking, xss and other injections
 app.use(helmet());
 
 app.use(

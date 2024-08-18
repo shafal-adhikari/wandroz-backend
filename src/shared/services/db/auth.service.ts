@@ -32,10 +32,31 @@ export const updatePasswordToken = async (authId: string, token: string, tokenEx
   );
 };
 
+export const updateVerifyToken = async (authId: string, token: string, tokenExpiration: number) => {
+  await AuthModel.updateOne(
+    { _id: authId },
+    {
+      verifyToken: token,
+      verifyTokenExpires: tokenExpiration
+    }
+  );
+};
+export const updateVerifiedStatus = async (authId: string) => {
+  await AuthModel.updateOne({ _id: authId }, { isVerified: true });
+};
+
 export const getAuthUserByPasswordToken = async (token: string) => {
   const user = (await AuthModel.findOne({
     passwordResetToken: token,
     passwordResetExpires: { $gt: Date.now() }
+  }).exec()) as IAuthDocument;
+  return user;
+};
+
+export const getAuthUserByVerifyToken = async (token: string) => {
+  const user = (await AuthModel.findOne({
+    verifyToken: token,
+    verifyTokenExpires: { $gt: Date.now() }
   }).exec()) as IAuthDocument;
   return user;
 };
